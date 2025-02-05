@@ -280,11 +280,12 @@ fun MainScreen() {
             }
             Spacer(modifier = Modifier.size(10.dp))
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
                 // 카메라 버튼
                 Image(
-                    painter = painterResource(R.drawable.ic_launcher_background),
+                    painter = painterResource(R.drawable.camera),
                     contentDescription = null,
                     modifier = Modifier
                         .size(50.dp)
@@ -295,6 +296,8 @@ fun MainScreen() {
     } else {
         // 📸 카메라 화면
         Box(modifier = Modifier.fillMaxSize()) {
+            val context = LocalContext.current
+            val lifecycleOwner = LocalLifecycleOwner.current
             val previewView = remember { PreviewView(context) }
 
             val videoCapture = remember {
@@ -332,107 +335,141 @@ fun MainScreen() {
                 }
             }
 
-            // 📷 카메라 미리보기
-            AndroidView(
-                factory = { previewView },
+            Column(
                 modifier = Modifier.fillMaxSize()
-            )
-
-            // 버튼 UI (사진 촬영 & 비디오 녹화)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // 📸 사진 촬영 버튼
-                Image(
-                    painter = painterResource(R.drawable.ic_launcher_background),
-                    contentDescription = "사진 촬영",
+                // 🔼 위쪽 white 바 (뒤로 가기 버튼 포함)
+                Box(
                     modifier = Modifier
-                        .size(80.dp)
-                        .clickable {
-                            imageCapture?.let { capture ->
-                                val imageContentValues = ContentValues().apply {
-                                    put(MediaStore.MediaColumns.DISPLAY_NAME, "IMG_${System.currentTimeMillis()}")
-                                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/MyApp")
-                                    }
-                                }
-
-                                val outputOptions = ImageCapture.OutputFileOptions.Builder(
-                                    context.contentResolver,
-                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                    imageContentValues
-                                ).build()
-
-                                capture.takePicture(
-                                    outputOptions,
-                                    ContextCompat.getMainExecutor(context),
-                                    object : ImageCapture.OnImageSavedCallback {
-                                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                            Log.d("CameraScreen", "Photo saved: ${outputFileResults.savedUri}")
-                                        }
-
-                                        override fun onError(exception: ImageCaptureException) {
-                                            Log.e("CameraScreen", "Photo capture failed: ${exception.message}", exception)
-                                        }
-                                    }
-                                )
+                        .fillMaxWidth()
+                        .weight(0.1f) // 전체 화면의 10% 차지
+                        .background(Color.White),
+                    contentAlignment = Alignment.BottomStart
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.x), // 뒤로가기 버튼 아이콘
+                        contentDescription = "뒤로가기",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(start = 20.dp, bottom = 10.dp)
+                            .clickable {
+                                // 뒤로 가기 기능
+                                showCamera = false
                             }
-                        }
+                    )
+                }
+
+                // 📷 카메라 미리보기
+                AndroidView(
+                    factory = { previewView },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.75f) // 전체 화면의 75% 차지
                 )
 
-                // 🎥 비디오 녹화 버튼
-                Image(
-                    painter = painterResource(id = if (isRecording) R.drawable.ic_launcher_foreground else R.drawable.ic_launcher_foreground),
-                    contentDescription = "비디오 녹화",
+                // 🔽 아래쪽 white 바 (사진 촬영 및 비디오 녹화 버튼 포함)
+                Box(
                     modifier = Modifier
-                        .size(80.dp)
-                        .clickable {
-                            videoCapture?.let { videoCap ->
-                                if (recording == null) { // 녹화 시작
-                                    val videoContentValues = ContentValues().apply {
-                                        put(MediaStore.MediaColumns.DISPLAY_NAME, "VID_${System.currentTimeMillis()}")
-                                        put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                            put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/MyApp")
-                                        }
-                                    }
-
-                                    val mediaStoreOutputOptions = MediaStoreOutputOptions.Builder(
-                                        context.contentResolver,
-                                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                                    ).setContentValues(videoContentValues).build()
-
-                                    recording = videoCap.output.prepareRecording(context, mediaStoreOutputOptions)
-                                        .start(ContextCompat.getMainExecutor(context)) { recordEvent ->
-                                            when (recordEvent) {
-                                                is VideoRecordEvent.Start -> {
-                                                    isRecording = true
-                                                    Log.d("CameraScreen", "Video recording started")
-                                                }
-                                                is VideoRecordEvent.Finalize -> {
-                                                    if (!recordEvent.hasError()) {
-                                                        Log.d("CameraScreen", "Video saved: ${recordEvent.outputResults.outputUri}")
-                                                    } else {
-                                                        Log.e("CameraScreen", "Video recording error: ${recordEvent.error}")
-                                                    }
-                                                    isRecording = false
-                                                    recording = null
-                                                }
+                        .fillMaxWidth()
+                        .weight(0.15f) // 전체 화면의 15% 차지
+                        .background(Color.White),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        // 📸 사진 촬영 버튼
+                        Image(
+                            painter = painterResource(R.drawable.camera),
+                            contentDescription = "사진 촬영",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clickable {
+                                    imageCapture?.let { capture ->
+                                        val imageContentValues = ContentValues().apply {
+                                            put(MediaStore.MediaColumns.DISPLAY_NAME, "IMG_${System.currentTimeMillis()}")
+                                            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/MyApp")
                                             }
                                         }
-                                } else { // 녹화 중이면 중지
-                                    recording?.stop()
-                                    isRecording = false
-                                    recording = null
+
+                                        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+                                            context.contentResolver,
+                                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                            imageContentValues
+                                        ).build()
+
+                                        capture.takePicture(
+                                            outputOptions,
+                                            ContextCompat.getMainExecutor(context),
+                                            object : ImageCapture.OnImageSavedCallback {
+                                                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                                    Log.d("CameraScreen", "Photo saved: ${outputFileResults.savedUri}")
+                                                }
+
+                                                override fun onError(exception: ImageCaptureException) {
+                                                    Log.e("CameraScreen", "Photo capture failed: ${exception.message}", exception)
+                                                }
+                                            }
+                                        )
+                                    }
                                 }
-                            }
-                        }
-                )
+                        )
+
+                        // 🎥 비디오 녹화 버튼
+                        Image(
+                            painter = painterResource(id = if (isRecording) R.drawable.blackrect else R.drawable.red),
+                            contentDescription = "비디오 녹화",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clickable {
+                                    videoCapture?.let { videoCap ->
+                                        if (recording == null) { // 녹화 시작
+                                            val videoContentValues = ContentValues().apply {
+                                                put(MediaStore.MediaColumns.DISPLAY_NAME, "VID_${System.currentTimeMillis()}")
+                                                put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                                    put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/MyApp")
+                                                }
+                                            }
+
+                                            val mediaStoreOutputOptions = MediaStoreOutputOptions.Builder(
+                                                context.contentResolver,
+                                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                                            ).setContentValues(videoContentValues).build()
+
+                                            recording = videoCap.output.prepareRecording(context, mediaStoreOutputOptions)
+                                                .start(ContextCompat.getMainExecutor(context)) { recordEvent ->
+                                                    when (recordEvent) {
+                                                        is VideoRecordEvent.Start -> {
+                                                            isRecording = true
+                                                            Log.d("CameraScreen", "Video recording started")
+                                                        }
+                                                        is VideoRecordEvent.Finalize -> {
+                                                            if (!recordEvent.hasError()) {
+                                                                Log.d("CameraScreen", "Video saved: ${recordEvent.outputResults.outputUri}")
+                                                            } else {
+                                                                Log.e("CameraScreen", "Video recording error: ${recordEvent.error}")
+                                                            }
+                                                            isRecording = false
+                                                            recording = null
+                                                        }
+                                                    }
+                                                }
+                                        } else { // 녹화 중이면 중지
+                                            recording?.stop()
+                                            isRecording = false
+                                            recording = null
+                                        }
+                                    }
+                                }
+                        )
+                    }
+                }
             }
         }
     }
