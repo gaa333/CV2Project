@@ -62,6 +62,7 @@ fun DetailAnnouncementScreen(
 ) {
     val context = LocalContext.current as? Activity
     var showDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,7 +98,7 @@ fun DetailAnnouncementScreen(
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
                     title = { Text("공지사항 삭제") },
-                    text = { Text("내용이 영구적으로 삭제됩니다. \n삭제하시겠습니다?") },
+                    text = { Text("내용이 영구적으로 삭제됩니다. \n삭제하시겠습니까?") },
                     confirmButton = {
                         Button(
                             onClick = {
