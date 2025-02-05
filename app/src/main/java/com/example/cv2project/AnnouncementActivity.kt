@@ -76,6 +76,17 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
                 // 변경된 공지사항을 SharedPreferences에 저장
                 announcementPrefs.saveAnnouncements(announcements)
             }
+            //  삭제 요청 확인
+            val deleteTitle = result.data?.getStringExtra("delete_title")
+            val deleteContent = result.data?.getStringExtra("delete_content")
+            val deleteDate = result.data?.getStringExtra("delete_date")
+
+            if (deleteTitle != null && deleteContent != null && deleteDate != null) {
+                announcements = announcements.filterNot {
+                    it.first == deleteTitle && it.second == deleteContent && it.third == deleteDate
+                }
+                announcementPrefs.saveAnnouncements(announcements) // 저장소 업데이트
+            }
         }
     }
 
@@ -133,6 +144,14 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
+                        .clickable {
+                            val intent = Intent(context, DetailAnnouncementActivity::class.java).apply {
+                                putExtra("announcement_title", announcement.first)
+                                putExtra("announcement_content", announcement.second)
+                                putExtra("announcement_date", announcement.third)
+                            }
+                            launcher.launch(intent) // DetailAnnouncementActivity 실행
+                        }
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(

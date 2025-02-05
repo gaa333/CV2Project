@@ -36,6 +36,7 @@
         <activity android:name=".PoseAnalysisActivity" />
         <activity android:name=".ScheduleActivity" />
         <activity android:name=".AddAnnouncementActivity" />
+        <activity android:name=".DetailAnnouncementActivity" />
     </application>
 
 </manifest>
