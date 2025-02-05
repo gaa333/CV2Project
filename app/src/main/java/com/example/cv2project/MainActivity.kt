@@ -118,7 +118,7 @@ fun MainScreen() {
                     .background(Color.White)
                     .padding(10.dp)
             ) {
-                Text("우리 기관 메뉴", fontSize = 15.sp)
+                Text("우리 기관 메뉴", fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp))
                 Spacer(modifier = Modifier.weight(0.1f))
 
                 // 첫 번째 줄 버튼 (각 메뉴마다 다른 이미지 적용)

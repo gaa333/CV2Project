@@ -35,6 +35,7 @@
         <activity android:name=".PickupServiceActivity" />
         <activity android:name=".PoseAnalysisActivity" />
         <activity android:name=".ScheduleActivity" />
+        <activity android:name=".AddAnnouncementActivity" />
     </application>
 
 </manifest>
