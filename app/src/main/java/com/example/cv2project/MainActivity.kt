@@ -2,6 +2,7 @@ package com.example.cv2project
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -63,7 +64,6 @@ import com.example.cv2project.ui.theme.CV2ProjectTheme
 import androidx.camera.core.Preview
 
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,194 +96,66 @@ fun MainScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.LightGray),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.weight(0.1f))
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.1f),
                 horizontalArrangement = Arrangement.Start
             ) {
                 Text("싸커노트", color = Color.Black, fontSize = 30.sp)
             }
-            Spacer(modifier = Modifier.size(20.dp))
+
+            Spacer(modifier = Modifier.weight(0.1f))
+
             Column(
                 modifier = Modifier
-                    .padding(10.dp)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
+                    .weight(0.6f)
                     .clip(RoundedCornerShape(15.dp))
-                    .background(color = Color.White)
+                    .background(Color.White)
+                    .padding(10.dp)
             ) {
                 Text("우리 기관 메뉴", fontSize = 15.sp)
-                Spacer(modifier = Modifier.size(10.dp))
-                // 첫번째 줄 버튼
-                Row(
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    // 알림장 버튼 notice
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent1 = Intent(context, NoticeActivity::class.java)
-                                    context.startActivity(intent1)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("알림장")
-                    }
-                    // 공지사항 버튼 announcement
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent2 = Intent(context, AnnouncementActivity::class.java)
-                                    context.startActivity(intent2)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("공지사항")
-                    }
-                    // 일정표 버튼 schedule
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent3 = Intent(context, ScheduleActivity::class.java)
-                                    context.startActivity(intent3)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("일정표")
-                    }
+                Spacer(modifier = Modifier.weight(0.1f))
+
+                // 첫 번째 줄 버튼 (각 메뉴마다 다른 이미지 적용)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    MenuButton("알림장", R.drawable.red, context, NoticeActivity::class.java)
+                    MenuButton("공지사항", R.drawable.red, context, AnnouncementActivity::class.java)
+                    MenuButton("일정표", R.drawable.red, context, ScheduleActivity::class.java)
                 }
-                Spacer(modifier = Modifier.size(10.dp))
-                // 두번째 줄 버튼
-                Row(
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    // 출석부 버튼 attendance
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent4 = Intent(context, AttendanceActivity::class.java)
-                                    context.startActivity(intent4)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("출석부")
-                    }
-                    // 픽업 서비스 버튼 pickup service
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent5 = Intent(context, PickupServiceActivity::class.java)
-                                    context.startActivity(intent5)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("픽업 서비스")
-                    }
-                    // 자세 분석 버튼 pose analysis
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent6 = Intent(context, PoseAnalysisActivity::class.java)
-                                    context.startActivity(intent6)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("자세 분석")
-                    }
+
+                Spacer(modifier = Modifier.weight(0.1f))
+
+                // 두 번째 줄 버튼
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    MenuButton("출석부", R.drawable.red, context, AttendanceActivity::class.java)
+                    MenuButton("픽업 서비스", R.drawable.red, context, PickupServiceActivity::class.java)
+                    MenuButton("자세 분석", R.drawable.red, context, PoseAnalysisActivity::class.java)
                 }
-                Spacer(modifier = Modifier.size(10.dp))
-                // 세번째 줄 버튼
-                Row(
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    // 성과 보고서 버튼 performance report
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent7 =
-                                        Intent(context, PerformanceReportActivity::class.java)
-                                    context.startActivity(intent7)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("성과 보고서")
-                    }
-                    // 원비 결제 버튼 payment
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    val intent8 = Intent(context, PaymentActivity::class.java)
-                                    context.startActivity(intent8)
-                                }
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
-                        Text("원비 결제")
-                    }
+
+                Spacer(modifier = Modifier.weight(0.1f))
+
+                // 세 번째 줄 버튼
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    MenuButton("성과 보고서", R.drawable.red, context, PerformanceReportActivity::class.java)
+                    MenuButton("원비 결제", R.drawable.red, context, PaymentActivity::class.java)
                 }
             }
-            Spacer(modifier = Modifier.size(10.dp))
+
+            Spacer(modifier = Modifier.weight(0.1f))
+
+
+            // 카메라 실행 버튼
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.3f),
                 horizontalArrangement = Arrangement.Center
             ) {
-                // 카메라 버튼
                 Image(
                     painter = painterResource(R.drawable.camera),
                     contentDescription = null,
@@ -292,6 +164,7 @@ fun MainScreen() {
                         .clickable { showCamera = true }
                 )
             }
+            Spacer(modifier = Modifier.weight(0.1f))
         }
     } else {
         // 📸 카메라 화면
@@ -376,7 +249,8 @@ fun MainScreen() {
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(top = 10.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.Top
@@ -390,10 +264,16 @@ fun MainScreen() {
                                 .clickable {
                                     imageCapture?.let { capture ->
                                         val imageContentValues = ContentValues().apply {
-                                            put(MediaStore.MediaColumns.DISPLAY_NAME, "IMG_${System.currentTimeMillis()}")
+                                            put(
+                                                MediaStore.MediaColumns.DISPLAY_NAME,
+                                                "IMG_${System.currentTimeMillis()}"
+                                            )
                                             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/MyApp")
+                                                put(
+                                                    MediaStore.Images.Media.RELATIVE_PATH,
+                                                    "Pictures/MyApp"
+                                                )
                                             }
                                         }
 
@@ -408,11 +288,18 @@ fun MainScreen() {
                                             ContextCompat.getMainExecutor(context),
                                             object : ImageCapture.OnImageSavedCallback {
                                                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                                    Log.d("CameraScreen", "Photo saved: ${outputFileResults.savedUri}")
+                                                    Log.d(
+                                                        "CameraScreen",
+                                                        "Photo saved: ${outputFileResults.savedUri}"
+                                                    )
                                                 }
 
                                                 override fun onError(exception: ImageCaptureException) {
-                                                    Log.e("CameraScreen", "Photo capture failed: ${exception.message}", exception)
+                                                    Log.e(
+                                                        "CameraScreen",
+                                                        "Photo capture failed: ${exception.message}",
+                                                        exception
+                                                    )
                                                 }
                                             }
                                         )
@@ -430,30 +317,50 @@ fun MainScreen() {
                                     videoCapture?.let { videoCap ->
                                         if (recording == null) { // 녹화 시작
                                             val videoContentValues = ContentValues().apply {
-                                                put(MediaStore.MediaColumns.DISPLAY_NAME, "VID_${System.currentTimeMillis()}")
+                                                put(
+                                                    MediaStore.MediaColumns.DISPLAY_NAME,
+                                                    "VID_${System.currentTimeMillis()}"
+                                                )
                                                 put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                                    put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/MyApp")
+                                                    put(
+                                                        MediaStore.Video.Media.RELATIVE_PATH,
+                                                        "Movies/MyApp"
+                                                    )
                                                 }
                                             }
 
-                                            val mediaStoreOutputOptions = MediaStoreOutputOptions.Builder(
-                                                context.contentResolver,
-                                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                                            ).setContentValues(videoContentValues).build()
+                                            val mediaStoreOutputOptions =
+                                                MediaStoreOutputOptions.Builder(
+                                                    context.contentResolver,
+                                                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                                                ).setContentValues(videoContentValues).build()
 
-                                            recording = videoCap.output.prepareRecording(context, mediaStoreOutputOptions)
+                                            recording = videoCap.output.prepareRecording(
+                                                context,
+                                                mediaStoreOutputOptions
+                                            )
                                                 .start(ContextCompat.getMainExecutor(context)) { recordEvent ->
                                                     when (recordEvent) {
                                                         is VideoRecordEvent.Start -> {
                                                             isRecording = true
-                                                            Log.d("CameraScreen", "Video recording started")
+                                                            Log.d(
+                                                                "CameraScreen",
+                                                                "Video recording started"
+                                                            )
                                                         }
+
                                                         is VideoRecordEvent.Finalize -> {
                                                             if (!recordEvent.hasError()) {
-                                                                Log.d("CameraScreen", "Video saved: ${recordEvent.outputResults.outputUri}")
+                                                                Log.d(
+                                                                    "CameraScreen",
+                                                                    "Video saved: ${recordEvent.outputResults.outputUri}"
+                                                                )
                                                             } else {
-                                                                Log.e("CameraScreen", "Video recording error: ${recordEvent.error}")
+                                                                Log.e(
+                                                                    "CameraScreen",
+                                                                    "Video recording error: ${recordEvent.error}"
+                                                                )
                                                             }
                                                             isRecording = false
                                                             recording = null
@@ -489,5 +396,26 @@ fun RequestCameraPermission() {
 
     LaunchedEffect(Unit) {
         launcher.launch(android.Manifest.permission.CAMERA)
+    }
+}
+
+@Composable
+fun MenuButton(title: String, imageResId: Int, context: Context, activity: Class<*>) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.clickable {
+            val intent = Intent(context, activity)
+            context.startActivity(intent)
+        }
+    ) {
+        Image(
+            painter = painterResource(imageResId), // ✅ 각 메뉴마다 다른 이미지 적용
+            contentDescription = title,
+            modifier = Modifier
+                .size(30.dp)
+        )
+        Spacer(modifier = Modifier.size(5.dp))
+        Text(title)
     }
 }
