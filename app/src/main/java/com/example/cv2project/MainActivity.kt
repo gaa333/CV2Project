@@ -7,9 +7,12 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -85,6 +88,8 @@ fun MainScreen() {
     var isRecording by remember { mutableStateOf(false) }
 //    var videoCapture: VideoCapture<*>? by remember { mutableStateOf(null) }
 //    var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
+
+    RequestCameraPermission()
 
     if (!showCamera) {
         Column(
@@ -430,5 +435,22 @@ fun MainScreen() {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun RequestCameraPermission() {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            if (!granted) {
+                Toast.makeText(context, "카메라 권한이 필요합니다.", Toast.LENGTH_LONG).show()
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        launcher.launch(android.Manifest.permission.CAMERA)
     }
 }
