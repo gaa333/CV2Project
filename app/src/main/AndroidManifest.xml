@@ -7,6 +7,7 @@
         android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
     <application
+        android:hardwareAccelerated="false"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -38,7 +39,6 @@
         <activity android:name=".AddAnnouncementActivity" />
         <activity android:name=".DetailAnnouncementActivity" />
         <activity android:name=".StudentManagementActivity" />
-        <activity android:name=".AddStudentActivity" />
         <activity android:name=".AddNoticeActivity" />
     </application>
 
