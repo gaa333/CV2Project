@@ -1,10 +1,13 @@
 package com.example.cv2project
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,14 +23,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,7 +48,7 @@ class NoticeActivity: ComponentActivity() {
         notices = mutableStateOf(noticePrefs.loadNotices()) // 초기 데이터 로드
         setContent {
             CV2ProjectTheme {
-                NoticeScreen(notices)
+                NoticeScreen(notices, noticePrefs)
             }
         }
     }
@@ -61,9 +60,41 @@ class NoticeActivity: ComponentActivity() {
 
 // 알림장
 @Composable
-fun NoticeScreen(notices: MutableState<List<Notice>>) {
+fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePreferences) {
     val context = LocalContext.current as? Activity
 //    var notices by remember { mutableStateOf(noticePrefs.loadNotices()) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val title = result.data?.getStringExtra("notice_title") ?: ""
+            val content = result.data?.getStringExtra("notice_content") ?: ""
+            val studentName = result.data?.getStringExtra("notice_studentName") ?: ""
+            val date = result.data?.getStringExtra("notice_date") ?: ""
+
+            if (title.isNotEmpty() && content.isNotEmpty() && studentName.isNotEmpty() && date.isNotEmpty()) {
+                val newNotice = Notice(title, content, studentName, date)
+                notices.value = notices.value + newNotice // ✅ .value를 사용하여 리스트 업데이트
+
+                // 변경된 알림을 SharedPreferences에 저장
+                noticePrefs.saveNotices(notices.value.toList()) // ✅ MutableState 대신 List로 변환하여 저장
+            }
+
+            // 삭제 요청 확인
+            val deleteTitle = result.data?.getStringExtra("delete_title")
+            val deleteContent = result.data?.getStringExtra("delete_content")
+            val deleteStudent = result.data?.getStringExtra("delete_studentName")
+            val deleteDate = result.data?.getStringExtra("delete_date")
+
+            if (deleteTitle != null && deleteContent != null && deleteStudent != null && deleteDate != null) {
+                notices.value = notices.value.filterNot {
+                    it.title == deleteTitle && it.content == deleteContent && it.studentName == deleteStudent && it.date == deleteDate
+                }
+                noticePrefs.saveNotices(notices.value.toList()) // ✅ 저장소 업데이트
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -121,7 +152,16 @@ fun NoticeScreen(notices: MutableState<List<Notice>>) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                val intent = Intent(context, DetailNoticeActivity::class.java).apply {
+                                    putExtra("title", notice.title)
+                                    putExtra("content", notice.content)
+                                    putExtra("studentName", notice.studentName)
+                                    putExtra("date", notice.date)
+                                }
+                                launcher.launch(intent)
+                            },
 //                        elevation = 4.dp
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
