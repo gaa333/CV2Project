@@ -3,6 +3,7 @@ package com.example.cv2project
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -59,6 +60,12 @@ class PaymentActivity: ComponentActivity() {
 fun PaymentScreen() {
     val context = LocalContext.current as? Activity
     var checked by remember { mutableStateOf(false) }
+
+    var showTextField1 by remember { mutableStateOf(false) }
+    var showTextField2 by remember { mutableStateOf(false) }
+    var showTextField3 by remember { mutableStateOf(false) }
+    var showTextField4 by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.fillMaxSize()
             .padding(10.dp),
@@ -122,7 +129,8 @@ fun PaymentScreen() {
                         .border(
                             width = 1.dp,
                             color = Color.Gray
-                        ),
+                        )
+                        .clickable { showTextField1 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -140,7 +148,8 @@ fun PaymentScreen() {
                         .border(
                             width = 1.dp,
                             color = Color.Gray
-                        ),
+                        )
+                        .clickable { showTextField2 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -160,7 +169,8 @@ fun PaymentScreen() {
                         .border(
                             width = 1.dp,
                             color = Color.Gray
-                        ),
+                        )
+                        .clickable { showTextField3 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -177,7 +187,8 @@ fun PaymentScreen() {
                         .border(
                             width = 1.dp,
                             color = Color.Gray
-                        ),
+                        )
+                        .clickable { showTextField4 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -209,7 +220,7 @@ fun PaymentScreen() {
                             Text("개인정보 수집이용 및 마케팅 정보 수신동의\n(필수)", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                         }
                     }
-                    Divider(thickness = 1.dp)
+                    Divider(thickness = 1.dp, modifier = Modifier.padding(start = 10.dp, end = 10.dp))
                     Column(
                         modifier = Modifier.weight(0.5f)
                             .fillMaxWidth(),
@@ -246,11 +257,26 @@ fun PaymentScreen() {
                         .height(60.dp)
                         .padding(10.dp)
                         .clip(RoundedCornerShape(5.dp)),
-                    onClick = {}
+                    onClick = {
+                        Toast.makeText(context, "발송 완료~", Toast.LENGTH_SHORT).show()
+                    },
+                    enabled = true
                 ) {
                     Text("청구서 발송하기", fontSize = 18.sp, color = Color.White)
                 }
             }
+        }
+        if (showTextField1) {
+            // 청구대상 팝업창
+        }
+        if (showTextField2) {
+            // 휴대전화번호 팝업창
+        }
+        if (showTextField3) {
+            // 청구항목 팝업창
+        }
+        if (showTextField4) {
+            // 청구금액 팝업창
         }
     }
 }
