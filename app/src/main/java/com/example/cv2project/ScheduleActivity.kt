@@ -3,18 +3,36 @@ package com.example.cv2project
 import android.app.Activity
 import android.app.TimePickerDialog
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.CalendarView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,9 +43,11 @@ import com.example.cv2project.ui.theme.CV2ProjectTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
-class ScheduleActivity : ComponentActivity() {
+class ScheduleActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -41,7 +61,7 @@ class ScheduleActivity : ComponentActivity() {
 @Composable
 fun ScheduleScreen() {
     val context = LocalContext.current as? Activity
-    var selectedDate by remember { mutableStateOf(getTodayDate()) }
+    var selectedDate by remember { mutableStateOf(getTodaysDate()) }
     val scheduleData = remember { mutableStateListOf<Schedule>() }
     val sharedPreferences = context?.getSharedPreferences("SchedulePrefs", Context.MODE_PRIVATE)
     val gson = Gson()
@@ -187,7 +207,7 @@ fun AddScheduleDialog(selectedDate: String, onDismiss: () -> Unit, onAddSchedule
 data class Schedule(val date: String, val time: String, val event: String)
 
 // 오늘 날짜를 가져오는 함수
-fun getTodayDate(): String {
+fun getTodaysDate(): String {
     val sdf = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
     return sdf.format(Date())
 }

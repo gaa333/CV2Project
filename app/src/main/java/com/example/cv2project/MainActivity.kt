@@ -143,7 +143,7 @@ fun MainScreen() {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     MenuButton("성과 보고서", R.drawable.red, context, PerformanceReportActivity::class.java)
                     MenuButton("원비 결제", R.drawable.red, context, PaymentActivity::class.java)
-                    MenuButton("학생 관리", R.drawable.red, context, StudentManagementActivity::class.java)
+                    MenuButton("학생 관리", R.drawable.red, context, StudentClassListActivity::class.java)
                 }
             }
 

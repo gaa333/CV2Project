@@ -8,29 +8,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -77,50 +63,57 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
+                .height(50.dp)
                 .background(color = Color.White),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(25.dp)
+                    .clickable { context?.finish() }
+            )
             Text(
                 "학생 관리",
                 color = Color.Black,
-                fontSize = 30.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
+                fontSize = 25.sp,
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
-            Image(
-                painter = painterResource(R.drawable.pen),
+            Icon(
+                imageVector = Icons.Default.Edit,
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(30.dp)
+                    .padding(end = 15.dp)
+                    .size(25.dp)
                     .clickable {
                         isAddingStudent = true
                     }
             )
-            Image(
-                painter = painterResource(R.drawable.x),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(20.dp)
-                    .clickable { context?.finish() }
-            )
         }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 20.dp)
         ) {
-            // 학생 리스트
+            val context = LocalContext.current
+
             students.forEach { student ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-//                    elevation = 4.dp
+                        .padding(vertical = 4.dp)
+                        .clickable {
+                            val intent = Intent(context, StudentDetailActivity::class.java).apply {
+                                putExtra("student_name", student.name)
+                                putExtra("student_age", student.age)
+                            }
+                            context.startActivity(intent)
+                        }
                 ) {
                     Row(
                         modifier = Modifier
@@ -132,7 +125,7 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
                         Text("${student.name}, ${student.age}세")
 
                         Image(
-                            painter = painterResource(id = R.drawable.delete), // 휴지통 이미지
+                            painter = painterResource(id = R.drawable.delete),
                             contentDescription = "삭제",
                             modifier = Modifier
                                 .size(24.dp)
@@ -141,43 +134,39 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
                                     showDialog = true
                                 }
                         )
-
-                        if (showDialog) {
-                            AlertDialog(
-                                onDismissRequest = { showDialog = false },
-                                title = { Text("학생 정보 삭제") },
-                                text = { Text("학생 정보가 영구적으로 삭제됩니다. \n삭제하시겠습니까?") },
-                                confirmButton = {
-                                    Button(
-                                        onClick = {
-                                            selectedStudent?.let { studentToDelete ->
-                                                val updatedStudents = students.toMutableList()
-                                                updatedStudents.remove(studentToDelete) // 학생 객체를 직접 삭제
-                                                studentPrefs.saveStudents(updatedStudents)
-                                                students = updatedStudents
-                                            }
-                                            showDialog = false // 다이얼로그 닫기
-                                            selectedStudent = null
-                                        }                                    ) {
-                                        Text("삭제")
-                                    }
-                                },
-                                dismissButton = {
-                                    Button(
-                                        onClick = {
-                                            showDialog = false
-                                            selectedStudent = null
-                                        }
-                                    ) {
-                                        Text("취소")
-                                    }
-                                }
-                            )
-                        }
                     }
                 }
             }
         }
+    }
+
+    // ✅ 삭제 확인 다이얼로그 추가
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("학생 삭제") },
+            text = { Text("정말로 ${selectedStudent?.name} 학생을 삭제하시겠습니까?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        selectedStudent?.let { student ->
+                            val updatedStudents = students.toMutableList()
+                            updatedStudents.remove(student) // ✅ 리스트에서 삭제
+                            studentPrefs.saveStudents(updatedStudents) // ✅ 저장
+                            students = updatedStudents // ✅ 상태 업데이트
+                        }
+                        showDialog = false
+                    }
+                ) {
+                    Text("삭제")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
     }
 
     if (isAddingStudent) {
