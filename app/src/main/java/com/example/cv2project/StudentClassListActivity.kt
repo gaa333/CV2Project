@@ -100,7 +100,6 @@ fun StudentClassListScreen() {
                 )
             }
         }
-
         if (isAddingClass) {
             AlertDialog(
                 onDismissRequest = { isAddingClass = false },
@@ -108,13 +107,8 @@ fun StudentClassListScreen() {
                 text = {
                     OutlinedTextField(
                         value = newClassName,
-                        onValueChange = {
-                            newClassName = it.filter { char -> char.isDigit() }
-                            if (newClassName.isNotEmpty()) {
-                                newClassName = "${newClassName}세반"
-                            }
-                        },
-                        label = { Text("숫자 입력") }
+                        onValueChange = { newClassName = it },
+                        label = { Text("반 이름 입력") }
                     )
                 },
                 confirmButton = {
