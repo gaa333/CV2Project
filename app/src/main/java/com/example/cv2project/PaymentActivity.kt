@@ -129,6 +129,7 @@ fun PaymentScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .padding(15.dp)
                     .padding(bottom = 20.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Top
@@ -142,7 +143,6 @@ fun PaymentScreen() {
                         .fillMaxWidth()
                         .height(60.dp)
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(15.dp))
                         .border(width = 1.dp, color = Color.Gray)
                         .clickable { showTextField1 = true },
                     verticalArrangement = Arrangement.Center,
@@ -159,7 +159,6 @@ fun PaymentScreen() {
                         .fillMaxWidth()
                         .height(60.dp)
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(15.dp))
                         .border(width = 1.dp, color = Color.Gray)
                         .clickable { showTextField2 = true },
                     verticalArrangement = Arrangement.Center,
@@ -178,7 +177,6 @@ fun PaymentScreen() {
                         .fillMaxWidth()
                         .height(60.dp)
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(15.dp))
                         .border(width = 1.dp, color = Color.Gray)
                         .clickable { showTextField3 = true },
                     verticalArrangement = Arrangement.Center,
@@ -195,7 +193,6 @@ fun PaymentScreen() {
                         .fillMaxWidth()
                         .height(60.dp)
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(15.dp))
                         .border(width = 1.dp, color = Color.Gray)
                         .clickable { showTextField4 = true },
                     verticalArrangement = Arrangement.Center,
@@ -208,7 +205,6 @@ fun PaymentScreen() {
                         .fillMaxWidth()
                         .height(120.dp)
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(10.dp))
                         .background(color = Color.LightGray),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
@@ -229,7 +225,7 @@ fun PaymentScreen() {
                                 modifier = Modifier.size(30.dp)
                             )
                             Text(
-                                "개인정보 수집이용 및 마케팅 정보 수신동의\n(필수)",
+                                "개인정보 수집이용 및 마케팅 정보 수신동의 (필수)",
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 15.sp
                             )
@@ -271,7 +267,6 @@ fun PaymentScreen() {
                         .fillMaxWidth()
                         .height(60.dp)
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(10.dp))
                         .background(color = Color.LightGray),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -282,8 +277,7 @@ fun PaymentScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(60.dp)
-                        .padding(10.dp)
-                        .clip(RoundedCornerShape(5.dp)),
+                        .padding(10.dp),
                     onClick = {
                         Toast.makeText(context, "발송 완료~", Toast.LENGTH_SHORT).show()
                     },

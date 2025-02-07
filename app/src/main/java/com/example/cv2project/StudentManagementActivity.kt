@@ -21,9 +21,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,16 +52,17 @@ class StudentManagementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         studentPrefs = StudentPreferences(this)
+        val selectedClassName = intent.getStringExtra("class_name") ?: "반 이름 없음"
         setContent {
             CV2ProjectTheme {
-                StudentManagementScreen(studentPrefs)
+                StudentManagementScreen(studentPrefs, selectedClassName)
             }
         }
     }
 }
 
 @Composable
-fun StudentManagementScreen(studentPrefs: StudentPreferences) {
+fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName: String) {
     val context = LocalContext.current as? Activity
     var students by remember { mutableStateOf(studentPrefs.loadStudents()) }
     var isAddingStudent by remember { mutableStateOf(false) }
@@ -81,33 +86,31 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
                 .background(color = Color.White),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                "학생 관리",
-                color = Color.Black,
-                fontSize = 30.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
-            )
-            Image(
-                painter = painterResource(R.drawable.pen),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(30.dp)
-                    .clickable {
-                        isAddingStudent = true
-                    }
-            )
-            Image(
-                painter = painterResource(R.drawable.x),
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(end = 15.dp)
-                    .size(20.dp)
+                    .size(25.dp)
                     .clickable { context?.finish() }
             )
-        }
+            Text(
+                text = "$selectedClassName 학생 관리",
+                color = Color.Black,
+                fontSize = 25.sp,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(25.dp)
+                    .clickable {
+                        isAddingStudent = true
+                    }
+            )        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -119,7 +122,14 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 4.dp)
+                        .clickable {
+                            val intent = Intent(context, StudentDetailActivity::class.java).apply {
+                                putExtra("student_name", student.name)
+                                putExtra("student_age", student.age)
+                            }
+                            context?.startActivity(intent)
+                        },
 //                    elevation = 4.dp
                 ) {
                     Row(

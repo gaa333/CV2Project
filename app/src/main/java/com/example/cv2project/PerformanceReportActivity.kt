@@ -1,27 +1,52 @@
 package com.example.cv2project
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cv2project.preferences.Student
+import com.example.cv2project.preferences.StudentPreferences
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 
-class PerformanceReportActivity: ComponentActivity() {
+class PerformanceReportActivity : ComponentActivity() {
+    private lateinit var studentPrefs: StudentPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        studentPrefs = StudentPreferences(this)
         setContent {
             CV2ProjectTheme {
-                PerformanceReportScreen()
+                PerformanceReportScreen(studentPrefs)
             }
         }
     }
@@ -29,21 +54,81 @@ class PerformanceReportActivity: ComponentActivity() {
 
 // 성과 보고서
 @Composable
-fun PerformanceReportScreen() {
+fun PerformanceReportScreen(studentPrefs: StudentPreferences) {
     val context = LocalContext.current as? Activity
+    var students by remember { mutableStateOf(studentPrefs.loadStudents()) }
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.LightGray),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("성과 보고서", fontSize = 40.sp)
-        Button(
-            onClick = {
-                context?.finish()
-            }
+        Spacer(modifier = Modifier.weight(0.1f))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(color = Color.White),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("뒤로")
+            Text(
+                "성과 보고서",
+                color = Color.Black,
+                fontSize = 30.sp,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp)
+            )
+            Image(
+                painter = painterResource(R.drawable.x),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(20.dp)
+                    .clickable { context?.finish() }
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 20.dp)
+        ) {
+            // 학생 리스트..
+            students.forEach { student ->
+                StudentCard(student = student) { selectedStudent ->
+                    val intent = Intent(context, DetailPerformanceReportActivity::class.java).apply {
+                        putExtra("name", selectedStudent.name)
+                        putExtra("age", selectedStudent.age)
+                    }
+                    context?.startActivity(intent)
+                }
+            }
         }
     }
+}
 
+// ✅ 학생 카드 Composable
+@Composable
+fun StudentCard(student: Student, onClick: (Student) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .clickable { onClick(student) }, // ✅ 카드 클릭 이벤트 추가
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(student.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text("나이: ${student.age}", fontSize = 14.sp)
+        }
+    }
 }

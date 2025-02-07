@@ -41,6 +41,9 @@
         <activity android:name=".StudentManagementActivity" />
         <activity android:name=".AddNoticeActivity" />
         <activity android:name=".DetailNoticeActivity" />
+        <activity android:name=".DetailPerformanceReportActivity" />
+        <activity android:name=".StudentClassListActivity" />
+        <activity android:name=".StudentDetailActivity" />
     </application>
 
 </manifest>

@@ -14,6 +14,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -62,6 +63,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 import androidx.camera.core.Preview
+import androidx.compose.foundation.layout.aspectRatio
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 
 class MainActivity : ComponentActivity() {
@@ -122,7 +127,10 @@ fun MainScreen() {
                 Spacer(modifier = Modifier.weight(0.1f))
 
                 // 첫 번째 줄 버튼 (각 메뉴마다 다른 이미지 적용)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                     MenuButton("알림장", R.drawable.red, context, NoticeActivity::class.java)
                     MenuButton("공지사항", R.drawable.red, context, AnnouncementActivity::class.java)
                     MenuButton("일정표", R.drawable.red, context, ScheduleActivity::class.java)
@@ -131,7 +139,10 @@ fun MainScreen() {
                 Spacer(modifier = Modifier.weight(0.1f))
 
                 // 두 번째 줄 버튼
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                     MenuButton("출석부", R.drawable.red, context, AttendanceActivity::class.java)
                     MenuButton("픽업 서비스", R.drawable.red, context, PickupServiceActivity::class.java)
                     MenuButton("자세 분석", R.drawable.red, context, PoseAnalysisActivity::class.java)
@@ -140,10 +151,23 @@ fun MainScreen() {
                 Spacer(modifier = Modifier.weight(0.1f))
 
                 // 세 번째 줄 버튼
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    MenuButton("성과 보고서", R.drawable.red, context, PerformanceReportActivity::class.java)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    MenuButton(
+                        "성과 보고서",
+                        R.drawable.red,
+                        context,
+                        PerformanceReportActivity::class.java
+                    )
                     MenuButton("원비 결제", R.drawable.red, context, PaymentActivity::class.java)
-                    MenuButton("학생 관리", R.drawable.red, context, StudentManagementActivity::class.java)
+                    MenuButton(
+                        "학생 관리",
+                        R.drawable.red,
+                        context,
+                        StudentClassListActivity::class.java
+                    )
                 }
             }
 
@@ -187,11 +211,17 @@ fun MainScreen() {
             }
 
             LaunchedEffect(Unit) {
+                previewView.scaleType = PreviewView.ScaleType.FILL_START // 또는 FILL_START
+            }
+
+            LaunchedEffect(Unit) {
                 val cameraProvider = ProcessCameraProvider.getInstance(context).get()
 
-                val preview = Preview.Builder().build().apply {
-                    setSurfaceProvider(previewView.surfaceProvider)
-                }
+                val preview = Preview.Builder()
+                    .setTargetAspectRatio(getAspectRatio(previewView.width, previewView.height))
+                    .build().apply {
+                        setSurfaceProvider(previewView.surfaceProvider)
+                    }
 
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
@@ -238,7 +268,8 @@ fun MainScreen() {
                     factory = { previewView },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(0.75f) // 전체 화면의 75% 차지
+                        .weight(0.75f)
+                        .aspectRatio(20f/20f)
                 )
 
                 // 🔽 아래쪽 white 바 (사진 촬영 및 비디오 녹화 버튼 포함)
@@ -380,6 +411,15 @@ fun MainScreen() {
                 }
             }
         }
+    }
+}
+
+fun getAspectRatio(width: Int, height: Int): Int {
+    val previewRatio = max(width, height).toDouble() / min(width, height).toDouble()
+    return if (abs(previewRatio - 4.0 / 3.0) <= abs(previewRatio - 16.0 / 9.0)) {
+        AspectRatio.RATIO_4_3
+    } else {
+        AspectRatio.RATIO_16_9
     }
 }
 
