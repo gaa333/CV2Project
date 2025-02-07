@@ -9,12 +9,19 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,22 +35,24 @@ class StudentClassListActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CV2ProjectTheme {
-                ClassListScreen()
+                StudentClassListScreen()
             }
         }
     }
 }
 
 @Composable
-fun ClassListScreen() {
+fun StudentClassListScreen() {
     val context = LocalContext.current as? Activity
-    val classList = remember { listOf("6세반", "7세반", "8세반", "9세반") } // 반 목록
+    var classList by remember { mutableStateOf(listOf("6세반", "7세반")) }
+    var isAddingClass by remember { mutableStateOf(false) }
+    var newClassName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row( // ✅ Row로 감싸서 한 줄로 정렬
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp, horizontal = 16.dp),
@@ -56,12 +65,20 @@ fun ClassListScreen() {
                     .size(25.dp)
                     .clickable { context?.finish() }
             )
-            Spacer(modifier = Modifier.width(16.dp)) // 아이콘과 텍스트 사이 여백 추가
+            Spacer(modifier = Modifier.width(16.dp))
 
             Text(
                 text = "반 목록",
                 fontSize = 24.sp,
-                modifier = Modifier.weight(1f) // 텍스트를 가운데 정렬하기 위해 weight 사용
+                modifier = Modifier.weight(1f)
+            )
+
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "반 추가",
+                modifier = Modifier
+                    .size(30.dp)
+                    .clickable { isAddingClass = true }
             )
         }
 
@@ -72,7 +89,7 @@ fun ClassListScreen() {
                     .padding(8.dp)
                     .clickable {
                         val intent = Intent(context, StudentManagementActivity::class.java)
-                        intent.putExtra("class_name", className)
+                        intent.putExtra("class_name", className) // 반 이름 전달
                         context?.startActivity(intent)
                     }
             ) {
@@ -82,13 +99,43 @@ fun ClassListScreen() {
                     modifier = Modifier.padding(16.dp)
                 )
             }
-//            Image(
-//                painter = painterResource(id = R.drawable.student2),
-//                contentDescription = "student2",
-//                Modifier.fillMaxWidth()
-//                    .padding(horizontal = 16.dp)
-//            )
+        }
+
+        if (isAddingClass) {
+            AlertDialog(
+                onDismissRequest = { isAddingClass = false },
+                title = { Text("새로운 반 추가") },
+                text = {
+                    OutlinedTextField(
+                        value = newClassName,
+                        onValueChange = {
+                            newClassName = it.filter { char -> char.isDigit() }
+                            if (newClassName.isNotEmpty()) {
+                                newClassName = "${newClassName}세반"
+                            }
+                        },
+                        label = { Text("숫자 입력") }
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (newClassName.isNotBlank()) {
+                                classList = classList + newClassName
+                                newClassName = ""
+                                isAddingClass = false
+                            }
+                        }
+                    ) {
+                        Text("추가")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { isAddingClass = false }) {
+                        Text("취소")
+                    }
+                }
+            )
         }
     }
 }
-

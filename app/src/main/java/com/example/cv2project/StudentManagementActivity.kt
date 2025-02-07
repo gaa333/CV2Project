@@ -34,21 +34,26 @@ class StudentManagementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         studentPrefs = StudentPreferences(this)
+
+        // 반 이름을 전달받고, 없으면 기본값 "반 이름 없음"을 사용
+        val selectedClassName = intent.getStringExtra("class_name") ?: "반 이름 없음"
+
         setContent {
             CV2ProjectTheme {
-                StudentManagementScreen(studentPrefs)
+                StudentManagementScreen(studentPrefs, selectedClassName) // 전달된 반 이름을 전달
             }
         }
     }
 }
 
 @Composable
-fun StudentManagementScreen(studentPrefs: StudentPreferences) {
+fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName: String) {
     val context = LocalContext.current as? Activity
     var students by remember { mutableStateOf(studentPrefs.loadStudents()) }
     var isAddingStudent by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
+    var ageclass by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
     var selectedStudent by remember { mutableStateOf<Student?>(null) }
 
@@ -77,11 +82,12 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
                     .clickable { context?.finish() }
             )
             Text(
-                "학생 관리",
+                text = "$selectedClassName 학생 관리",
                 color = Color.Black,
                 fontSize = 25.sp,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
+
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = null,
@@ -169,6 +175,7 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
         )
     }
 
+    // 학생 추가 다이얼로그
     if (isAddingStudent) {
         Box(
             modifier = Modifier
@@ -199,7 +206,14 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = ageclass,
+                    onValueChange = { ageclass = it },
+                    label = { Text("반") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -214,7 +228,7 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences) {
                     ) {
                         Text("취소")
                     }
-
+                    Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
                             if (name.isNotEmpty() && age.isNotEmpty()) {
