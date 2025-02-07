@@ -35,13 +35,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +61,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 import androidx.camera.core.Preview
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.ui.res.colorResource
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -100,17 +102,20 @@ fun MainScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.LightGray),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(Color.LightGray) // 확인할라고 넣음
+                .padding(WindowInsets.systemBars.asPaddingValues()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.weight(0.1f))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.1f),
-                horizontalArrangement = Arrangement.Start
+                    .background(colorResource(R.color.black)) // 확인할라고 검정 넣음
+                    .padding(bottom = 30.dp, start = 30.dp, end = 30.dp, top = 20.dp), // socco가 왜 중앙으로 안갈까요?
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically // 세로 중앙 정렬
             ) {
-                Text("싸커노트", color = Color.Black, fontSize = 30.sp)
+                Text("SocCo", color = Color.White, fontSize = 30.sp)
             }
 
             Spacer(modifier = Modifier.weight(0.1f))
@@ -119,23 +124,22 @@ fun MainScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(0.6f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .background(Color.White)
+//                    .clip(RoundedCornerShape(15.dp))
+//                    .background(Color.White)
                     .padding(10.dp)
             ) {
-                Text("우리 기관 메뉴", fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp))
-                Spacer(modifier = Modifier.weight(0.1f))
+//                Text("우리 기관 메뉴", fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp))
+//                Spacer(modifier = Modifier.weight(0.1f))
 
                 // 첫 번째 줄 버튼 (각 메뉴마다 다른 이미지 적용)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    MenuButton("알림장", R.drawable.red, context, NoticeActivity::class.java)
-                    MenuButton("공지사항", R.drawable.red, context, AnnouncementActivity::class.java)
-                    MenuButton("일정표", R.drawable.red, context, ScheduleActivity::class.java)
+                    MenuButton("알림장", R.drawable.notice, context, NoticeActivity::class.java)
+                    MenuButton("공지사항", R.drawable.announcement, context, AnnouncementActivity::class.java)
+                    MenuButton("일정표", R.drawable.schedule, context, ScheduleActivity::class.java)
                 }
-
                 Spacer(modifier = Modifier.weight(0.1f))
 
                 // 두 번째 줄 버튼
@@ -143,11 +147,9 @@ fun MainScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    MenuButton("출석부", R.drawable.red, context, AttendanceActivity::class.java)
-                    MenuButton("픽업 서비스", R.drawable.red, context, PickupServiceActivity::class.java)
-                    MenuButton("자세 분석", R.drawable.red, context, PoseAnalysisActivity::class.java)
+                    MenuButton("픽업 서비스", R.drawable.pickup, context, PickupServiceActivity::class.java)
+                    MenuButton("자세 분석", R.drawable.pose, context, PoseAnalysisActivity::class.java)
                 }
-
                 Spacer(modifier = Modifier.weight(0.1f))
 
                 // 세 번째 줄 버튼
@@ -157,37 +159,36 @@ fun MainScreen() {
                 ) {
                     MenuButton(
                         "성과 보고서",
-                        R.drawable.red,
+                        R.drawable.report,
                         context,
                         PerformanceReportActivity::class.java
                     )
-                    MenuButton("원비 결제", R.drawable.red, context, PaymentActivity::class.java)
+                    MenuButton("원비 결제", R.drawable.pay, context, PaymentActivity::class.java)
                     MenuButton(
                         "학생 관리",
-                        R.drawable.red,
+                        R.drawable.student,
                         context,
                         StudentClassListActivity::class.java
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.weight(0.1f))
-
-
             // 카메라 실행 버튼
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(0.3f),
-                horizontalArrangement = Arrangement.Center
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.camera),
+                    painter = painterResource(R.drawable.soccer),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(100.dp)
                         .clickable { showCamera = true }
                 )
+                Text("실시간 동작 분석") // 이거 빼기로 했나요?
             }
             Spacer(modifier = Modifier.weight(0.1f))
         }
@@ -454,7 +455,7 @@ fun MenuButton(title: String, imageResId: Int, context: Context, activity: Class
             painter = painterResource(imageResId), // ✅ 각 메뉴마다 다른 이미지 적용
             contentDescription = title,
             modifier = Modifier
-                .size(30.dp)
+                .size(50.dp)
         )
         Spacer(modifier = Modifier.size(5.dp))
         Text(title)
