@@ -5,12 +5,15 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,28 +64,28 @@ fun StudentClassListScreen() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .height(60.dp)
+                .background(color = Color.LightGray),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "뒤로가기",
                 modifier = Modifier
+                    .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable { context?.finish() }
             )
-            Spacer(modifier = Modifier.width(16.dp))
-
             Text(
                 text = "반 목록",
-                fontSize = 24.sp,
-                modifier = Modifier.weight(1f)
+                fontSize = 25.sp
             )
-
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "반 추가",
                 modifier = Modifier
+                    .padding(end = 15.dp)
                     .size(30.dp)
                     .clickable { isAddingClass = true }
             )

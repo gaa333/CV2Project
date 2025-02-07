@@ -25,6 +25,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -81,8 +84,7 @@ fun PaymentScreen() {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(10.dp),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -91,37 +93,34 @@ fun PaymentScreen() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.weight(0.1f))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .background(color = Color.White),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(color = Color.LightGray),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "뒤로가기",
+                    modifier = Modifier
+                        .padding(start = 15.dp)
+                        .size(25.dp)
+                        .clickable { context?.finish() }
+                )
                 Text(
                     "원비 결제",
                     color = Color.Black,
-                    fontSize = 30.sp,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp)
+                    fontSize = 25.sp
                 )
-                Image(
-                    painter = painterResource(R.drawable.pen),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(end = 20.dp)
-                        .size(30.dp)
-                        .clickable {}
-                )
-                Image(
-                    painter = painterResource(R.drawable.x),
+                Icon(
+                    imageVector = Icons.Default.Add,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(end = 15.dp)
-                        .size(20.dp)
-                        .clickable { context?.finish() }
+                        .size(30.dp)
+                        .clickable {}
                 )
             }
 
