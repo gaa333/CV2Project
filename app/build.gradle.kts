@@ -73,7 +73,7 @@ dependencies {
 //    implementation("androidx.camera:camera-extensions:${camerax_version}")
     implementation ("com.google.code.gson:gson:2.8.9")
 
-    implementation ("com.google.mediapipe:tasks-vision:0.20230731")
+    implementation ("com.google.mediapipe:tasks-vision:0.10.21")
 //    implementation ("com.google.mediapipe:tasks-vision-image-generator:latest.release")
     implementation ("com.google.mlkit:vision-common:16.0.0")
     implementation ("org.tensorflow:tensorflow-lite-support:0.5.0")
@@ -81,4 +81,5 @@ dependencies {
     implementation ("androidx.media3:media3-exoplayer:1.5.1")
     implementation ("androidx.media3:media3-ui:1.5.1")
     implementation ("androidx.media3:media3-common:1.5.1")
+
 }
