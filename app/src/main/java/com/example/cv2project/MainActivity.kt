@@ -211,7 +211,7 @@ fun MainScreen() {
             }
 
             LaunchedEffect(Unit) {
-                previewView.scaleType = PreviewView.ScaleType.FILL_START // 또는 FILL_START
+                previewView.scaleType = PreviewView.ScaleType.FIT_END // 또는 FILL_START
             }
 
             LaunchedEffect(Unit) {
