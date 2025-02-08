@@ -15,13 +15,27 @@ class StudentPreferences(context: Context) {
         context.getSharedPreferences("student_prefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 
-    fun saveStudents(students: List<Student>) {
+    // 반별로 학생 저장 (각 반에 고유한 Key 사용)
+    fun saveStudents(className: String, students: List<Student>) {
         val jsonString = gson.toJson(students)
-        prefs.edit().putString("student_list", jsonString).apply()
+        prefs.edit().putString("students_$className", jsonString).apply()
     }
 
-    fun loadStudents(): List<Student> {
-        val jsonString = prefs.getString("student_list", "[]") ?: "[]"
+    // 반별로 학생 불러오기
+    fun loadStudents(className: String): List<Student> {
+        val jsonString = prefs.getString("students_$className", "[]") ?: "[]"
         return gson.fromJson(jsonString, object : TypeToken<List<Student>>() {}.type)
+    }
+    fun loadAllStudents(): List<Student> {
+        val allStudents = mutableListOf<Student>()
+        for (key in prefs.all.keys) {
+            if (key.startsWith("students_")) { // 반별 데이터만 가져오기
+                val jsonString = prefs.getString(key, "[]") ?: "[]"
+                val students: List<Student> =
+                    gson.fromJson(jsonString, object : TypeToken<List<Student>>() {}.type)
+                allStudents.addAll(students)
+            }
+        }
+        return allStudents
     }
 }

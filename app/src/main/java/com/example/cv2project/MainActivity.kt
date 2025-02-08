@@ -218,7 +218,7 @@ fun MainScreen() {
                 val cameraProvider = ProcessCameraProvider.getInstance(context).get()
 
                 val preview = Preview.Builder()
-                    .setTargetAspectRatio(getAspectRatio(previewView.width, previewView.height))
+//                    .setTargetAspectRatio(getAspectRatio(previewView.width, previewView.height))
                     .build().apply {
                         setSurfaceProvider(previewView.surfaceProvider)
                     }
@@ -269,7 +269,6 @@ fun MainScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(0.75f)
-                        .aspectRatio(20f/20f)
                 )
 
                 // 🔽 아래쪽 white 바 (사진 촬영 및 비디오 녹화 버튼 포함)

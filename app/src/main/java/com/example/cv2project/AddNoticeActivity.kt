@@ -58,7 +58,7 @@ fun AddNoticeScreen(
 ) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var students by remember { mutableStateOf(studentPrefs.loadStudents()) }
+    var students by remember { mutableStateOf(studentPrefs.loadAllStudents()) }
     var selectedStudent by remember { mutableStateOf<Student?>(null) }
     val todayDate = getTodayDate() // 오늘 날짜
 

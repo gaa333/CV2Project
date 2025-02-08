@@ -64,7 +64,7 @@ class StudentManagementActivity : ComponentActivity() {
 @Composable
 fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName: String) {
     val context = LocalContext.current as? Activity
-    var students by remember { mutableStateOf(studentPrefs.loadStudents()) }
+    var students by remember { mutableStateOf(studentPrefs.loadStudents(selectedClassName)) }
     var isAddingStudent by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
@@ -163,7 +163,7 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
                                             selectedStudent?.let { studentToDelete ->
                                                 val updatedStudents = students.toMutableList()
                                                 updatedStudents.remove(studentToDelete) // 학생 객체를 직접 삭제
-                                                studentPrefs.saveStudents(updatedStudents)
+                                                studentPrefs.saveStudents(selectedClassName, updatedStudents)
                                                 students = updatedStudents
                                             }
                                             showDialog = false // 다이얼로그 닫기
@@ -241,7 +241,7 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
                             if (name.isNotEmpty() && age.isNotEmpty()) {
                                 val updatedStudents = students.toMutableList()
                                 updatedStudents.add(Student(name, age.toInt()))
-                                studentPrefs.saveStudents(updatedStudents)
+                                studentPrefs.saveStudents(selectedClassName, updatedStudents)
                                 students = updatedStudents
                                 name = ""
                                 age = ""

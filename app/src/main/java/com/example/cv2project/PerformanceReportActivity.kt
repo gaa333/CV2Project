@@ -56,7 +56,7 @@ class PerformanceReportActivity : ComponentActivity() {
 @Composable
 fun PerformanceReportScreen(studentPrefs: StudentPreferences) {
     val context = LocalContext.current as? Activity
-    var students by remember { mutableStateOf(studentPrefs.loadStudents()) }
+    var students by remember { mutableStateOf(studentPrefs.loadAllStudents()) }
 
     Column(
         modifier = Modifier

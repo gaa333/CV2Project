@@ -57,7 +57,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     // CameraX core library using the camera2 implementation
-    val camerax_version = "1.3.0"
+    val camerax_version = "1.3.1"
     // The following line is optional, as the core library is included indirectly by camera-camera2
     implementation("androidx.camera:camera-core:${camerax_version}")
     implementation("androidx.camera:camera-camera2:${camerax_version}")
