@@ -120,7 +120,7 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
             retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
                 ?: return
 
-        val inferenceIntervalMs = 100L // 100ms 간격으로 프레임을 분석
+        val inferenceIntervalMs = 200L // 200ms 간격으로 프레임을 분석
         val numFrames = videoLengthMs / inferenceIntervalMs
 
         val results = mutableListOf<PoseLandmarkerResult>()

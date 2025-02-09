@@ -234,13 +234,16 @@ class PoseLandmarkerHelper(
             return null
         }
 
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+
         val videoLengthMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
         if (videoLengthMs <= 0) {
             Log.e("PoseAnalysis", "❌ Invalid video length.")
             return null
         }
 
-        val inferenceIntervalMs = 100L // 100ms 간격으로 분석
+        val inferenceIntervalMs = 200L // 200ms 간격으로 분석
         var lastTimestampMs = -1L
         var frameIndex = 0
         val resultList = mutableListOf<PoseLandmarkerResult>()
@@ -311,9 +314,6 @@ class PoseLandmarkerHelper(
 
         retriever.release()
         Log.d("PoseAnalysis", "🔍 retriever released. Returning results now.")
-
-        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
-        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
 
         return if (didErrorOccurred) null else ResultBundle(resultList, 0, height, width)
     }
