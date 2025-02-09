@@ -64,15 +64,22 @@ import androidx.core.content.ContextCompat
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 import androidx.camera.core.Preview
 import androidx.compose.foundation.layout.aspectRatio
+import com.google.common.util.concurrent.ListenableFuture
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
 
 class MainActivity : ComponentActivity() {
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private lateinit var poseGLSurfaceView: PoseGLSurfaceView
+    private var videoCapture: VideoCapture<Recorder>? = null
+    private var recording: Recording? = null
+    private var isRecording = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        poseGLSurfaceView = PoseGLSurfaceView(this)
         setContent {
             CV2ProjectTheme {
                 MainScreen()
