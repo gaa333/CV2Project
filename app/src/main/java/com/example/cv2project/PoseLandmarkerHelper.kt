@@ -74,6 +74,7 @@ class PoseLandmarkerHelper(
             DELEGATE_CPU -> {
                 baseOptionBuilder.setDelegate(Delegate.CPU)
             }
+
             DELEGATE_GPU -> {
                 baseOptionBuilder.setDelegate(Delegate.GPU)
             }
@@ -98,6 +99,7 @@ class PoseLandmarkerHelper(
                     )
                 }
             }
+
             else -> {
                 // no-op
             }
@@ -214,10 +216,14 @@ class PoseLandmarkerHelper(
         try {
             retriever.setDataSource(context, videoUri)
 
-            val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
-            val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+            val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                ?.toIntOrNull() ?: 0
+            val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                ?.toIntOrNull() ?: 0
 
-            val videoLengthMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+            val videoLengthMs =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    ?.toLongOrNull() ?: 0L
             if (videoLengthMs <= 0) {
                 Log.e("PoseAnalysis", "❌ Invalid video length.")
                 return null
@@ -237,7 +243,10 @@ class PoseLandmarkerHelper(
             }
 
             while (currentTimestampMs < videoLengthMs) {
-                val frame = retriever.getFrameAtTime(currentTimestampMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST)
+                val frame = retriever.getFrameAtTime(
+                    currentTimestampMs * 1000,
+                    MediaMetadataRetriever.OPTION_CLOSEST
+                )
                 if (frame == null) {
                     Log.e("PoseAnalysis", "❌ Frame at timestamp $currentTimestampMs is null")
                     currentTimestampMs += inferenceIntervalMs
@@ -254,7 +263,9 @@ class PoseLandmarkerHelper(
                     if (result != null) {
                         resultList.add(result)
 
-                        val galleryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
+                        val galleryPath =
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                                .toString()
                         val file = File(galleryPath, "pose_result_${frameIndex}.png")
 
                         try {
@@ -274,11 +285,17 @@ class PoseLandmarkerHelper(
                             Log.e("PoseAnalysis", "❌ Failed to save image to gallery: ${e.message}")
                         }
                     } else {
-                        Log.e("PoseAnalysis", "❌ Pose estimation failed at timestamp $currentTimestampMs")
+                        Log.e(
+                            "PoseAnalysis",
+                            "❌ Pose estimation failed at timestamp $currentTimestampMs"
+                        )
                     }
                 } catch (e: Exception) {
                     didErrorOccurred = true
-                    Log.e("PoseAnalysis", "❌ Error processing frame at $currentTimestampMs: ${e.message}")
+                    Log.e(
+                        "PoseAnalysis",
+                        "❌ Error processing frame at $currentTimestampMs: ${e.message}"
+                    )
                     e.printStackTrace()
                     break
                 }
@@ -304,18 +321,46 @@ class PoseLandmarkerHelper(
 
     fun drawPoseOnImage(bitmap: Bitmap, result: PoseLandmarkerResult): Bitmap {
         val canvas = Canvas(bitmap)
-        val paint = Paint()
-        paint.color = Color.RED
-        paint.strokeWidth = 5f
+        val paint = Paint().apply {
+            color = Color.RED
+            strokeWidth = 10f
+            style = Paint.Style.FILL
+        }
+
+        val linePaint = Paint().apply {
+            color = Color.WHITE  // ✅ 선 색상
+            strokeWidth = 5f     // ✅ 선 굵기
+            style = Paint.Style.STROKE
+        }
+
+        // ✅ MediaPipe Pose 모델의 랜드마크 연결 정의
+        val connections = listOf(
+            Pair(11, 13), Pair(13, 15), // 왼팔
+            Pair(12, 14), Pair(14, 16), // 오른팔
+            Pair(11, 12),               // 어깨 연결
+            Pair(11, 23), Pair(12, 24), // 몸통 연결
+            Pair(23, 25), Pair(25, 27), // 왼다리
+            Pair(24, 26), Pair(26, 28), // 오른다리
+            Pair(27, 29), Pair(29, 31), // 왼발
+            Pair(28, 30), Pair(30, 32)  // 오른발
+        )
 
         result.landmarks().forEach { landmark ->
             landmark.forEach { point ->
                 canvas.drawPoint(point.x() * bitmap.width, point.y() * bitmap.height, paint)
             }
+            for ((startIdx, endIdx) in connections) {
+                val start = landmark[startIdx]
+                val end = landmark[endIdx]
+                canvas.drawLine(
+                    start.x() * bitmap.width, start.y() * bitmap.height,
+                    end.x() * bitmap.width, end.y() * bitmap.height,
+                    linePaint
+                )
+            }
         }
         return bitmap
     }
-
 
 
     // Accepted a Bitmap and runs pose landmarker inference on it to return

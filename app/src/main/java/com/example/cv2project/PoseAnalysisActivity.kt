@@ -134,7 +134,10 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
                 val bitmap = frame.copy(Bitmap.Config.ARGB_8888, false)
                 val mpImage = BitmapImageBuilder(bitmap).build()
 
-                val result = poseLandmarkerHelper?.detectVideoFile(this, videoUri)  // ✅ `this` 추가 (Context 전달)
+                val result = poseLandmarkerHelper?.detectVideoFile(
+                    this,
+                    videoUri
+                )  // ✅ `this` 추가 (Context 전달)
 
 
                 result?.let { results.addAll(it.results) }
