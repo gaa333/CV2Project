@@ -5,17 +5,23 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -35,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
@@ -53,9 +60,9 @@ class StudentClassListActivity:ComponentActivity() {
 @Composable
 fun StudentClassListScreen() {
     val context = LocalContext.current as? Activity
-    var classList by remember { mutableStateOf(listOf("6세반", "7세반")) }
+//    var classList by remember { mutableStateOf(listOf("6세반", "7세반")) }
     var isAddingClass by remember { mutableStateOf(false) }
-    var newClassName by remember { mutableStateOf("") }
+//    var newClassName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -91,60 +98,102 @@ fun StudentClassListScreen() {
             )
         }
 
-        classList.forEach { className ->
-            Card(
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.class2),
+                contentDescription = "7세반",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
                     .clickable {
                         val intent = Intent(context, StudentManagementActivity::class.java)
-                        intent.putExtra("class_name", className) // 반 이름 전달
+                        val className = "7세반"
+                        intent.putExtra("class_name", className)
                         context?.startActivity(intent)
                     }
-            ) {
-                Text(
-                    text = className,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
-        if (isAddingClass) {
-            AlertDialog(
-                onDismissRequest = { isAddingClass = false },
-                title = { Text("새로운 반 추가") },
-                text = {
-                    OutlinedTextField(
-                        value = newClassName,
-                        onValueChange = {
-                            newClassName = it.filter { char -> char.isDigit() }
-                            if (newClassName.isNotEmpty()) {
-                                newClassName = "${newClassName}세반"
-                            }
-                        },
-                        label = { Text("숫자 입력") }
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (newClassName.isNotBlank()) {
-                                classList = classList + newClassName
-                                newClassName = ""
-                                isAddingClass = false
-                            }
-                        }
-                    ) {
-                        Text("추가")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { isAddingClass = false }) {
-                        Text("취소")
-                    }
-                }
+            )
+            Image(
+                painter = painterResource(id = R.drawable.class3),
+                contentDescription = "1학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.class4),
+                contentDescription = "2학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.class5),
+                contentDescription = "3학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.class6),
+                contentDescription = "4학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.class7),
+                contentDescription = "5학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.class8),
+                contentDescription = "6학년반",
             )
         }
+
+//        classList.forEach { className ->
+//            Card(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(8.dp)
+//                    .clickable {
+//                        val intent = Intent(context, StudentManagementActivity::class.java)
+//                        intent.putExtra("class_name", className) // 반 이름 전달
+//                        context?.startActivity(intent)
+//                    }
+//            ) {
+//                Text(
+//                    text = className,
+//                    fontSize = 20.sp,
+//                    modifier = Modifier.padding(16.dp)
+//                )
+//            }
+//        }
+
+//        if (isAddingClass) {
+//            AlertDialog(
+//                onDismissRequest = { isAddingClass = false },
+//                title = { Text("새로운 반 추가") },
+//                text = {
+//                    OutlinedTextField(
+//                        value = newClassName,
+//                        onValueChange = {
+//                            newClassName = it.filter { char -> char.isDigit() }
+//                            if (newClassName.isNotEmpty()) {
+//                                newClassName = "${newClassName}세반"
+//                            }
+//                        },
+//                        label = { Text("숫자 입력") }
+//                    )
+//                },
+//                confirmButton = {
+//                    Button(
+//                        onClick = {
+//                            if (newClassName.isNotBlank()) {
+//                                classList = classList + newClassName
+//                                newClassName = ""
+//                                isAddingClass = false
+//                            }
+//                        }
+//                    ) {
+//                        Text("추가")
+//                    }
+//                },
+//                dismissButton = {
+//                    Button(onClick = { isAddingClass = false }) {
+//                        Text("취소")
+//                    }
+//                }
+//            )
+//        }
     }
 }

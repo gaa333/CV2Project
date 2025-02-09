@@ -44,6 +44,7 @@
         <activity android:name=".DetailPerformanceReportActivity" />
         <activity android:name=".StudentClassListActivity" />
         <activity android:name=".StudentDetailActivity" />
+        <activity android:name=".PoseReportActivity" />
     </application>
 
 </manifest>

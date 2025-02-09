@@ -80,13 +80,6 @@ fun PickupServiceScreen() {
                     .size(20.dp)
                     .clickable { context?.finish() }
             )
-            Icon( // 없애야됨
-                imageVector = Icons.Default.Share,
-                contentDescription = "반 추가",
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(25.dp)
-            )
         }
         Spacer(modifier = Modifier.weight(0.1f))
 

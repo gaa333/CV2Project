@@ -72,30 +72,27 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
     var selectedStudent by remember { mutableStateOf<Student?>(null) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray),
-        verticalArrangement = Arrangement.Top,
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(0.1f))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.White),
-            verticalAlignment = Alignment.CenterVertically
+                .background(color = Color.LightGray),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
+                contentDescription = "뒤로가기",
                 modifier = Modifier
-                    .padding(end = 15.dp)
+                    .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable { context?.finish() }
             )
             Text(
-                text = "$selectedClassName 학생 관리",
+                text = "학생 프로필", //"$selectedClassName 반"
                 color = Color.Black,
                 fontSize = 25.sp,
                 modifier = Modifier.align(Alignment.CenterVertically)
@@ -110,7 +107,42 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
                     .clickable {
                         isAddingStudent = true
                     }
-            )        }
+            )
+        }
+
+        //
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.profile2),
+                contentDescription = "2학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile3),
+                contentDescription = "3학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile4),
+                contentDescription = "3학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile5),
+                contentDescription = "4학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile6),
+                contentDescription = "5학년반",
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile7),
+                contentDescription = "6학년반",
+            )
+        }
+
+        //
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -168,7 +200,7 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
                                             }
                                             showDialog = false // 다이얼로그 닫기
                                             selectedStudent = null
-                                        }                                    ) {
+                                        }) {
                                         Text("삭제")
                                     }
                                 },
