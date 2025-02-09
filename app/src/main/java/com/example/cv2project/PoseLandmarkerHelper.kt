@@ -45,6 +45,7 @@ class PoseLandmarkerHelper(
     // For this example this needs to be a var so it can be reset on changes.
     // If the Pose Landmarker will not change, a lazy val would be preferable.
     private var poseLandmarker: PoseLandmarker? = null
+    private var lastProcessedTimestamp: Long = -1L
 
     init {
         setupPoseLandmarker()
