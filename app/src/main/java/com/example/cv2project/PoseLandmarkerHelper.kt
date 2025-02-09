@@ -209,6 +209,98 @@ class PoseLandmarkerHelper(
     // frame in the video and attach the results to a bundle that will be
     // returned.
 
+    fun detectVideoFile(context: Context, videoUri: Uri): ResultBundle? {
+        val retriever = MediaMetadataRetriever()
+        try {
+            retriever.setDataSource(context, videoUri)
+
+            val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+            val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+
+            val videoLengthMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+            if (videoLengthMs <= 0) {
+                Log.e("PoseAnalysis", "❌ Invalid video length.")
+                return null
+            }
+
+            val inferenceIntervalMs = 200L // 200ms 간격으로 분석
+            val resultList = mutableListOf<PoseLandmarkerResult>()
+            var didErrorOccurred = false
+
+            var currentTimestampMs = 0L
+            var frameIndex = 0
+
+            // PoseLandmarker가 초기화되었는지 확인
+            if (poseLandmarker == null) {
+                Log.e("PoseAnalysis", "❌ PoseLandmarker is not initialized")
+                return null
+            }
+
+            while (currentTimestampMs < videoLengthMs) {
+                val frame = retriever.getFrameAtTime(currentTimestampMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST)
+                if (frame == null) {
+                    Log.e("PoseAnalysis", "❌ Frame at timestamp $currentTimestampMs is null")
+                    currentTimestampMs += inferenceIntervalMs
+                    continue
+                }
+
+                Log.d("PoseAnalysis", "✅ Successfully retrieved frame at $currentTimestampMs")
+
+                val mutableBitmap = frame.copy(Bitmap.Config.ARGB_8888, true)
+                val mpImage = BitmapImageBuilder(mutableBitmap).build()
+
+                try {
+                    val result = poseLandmarker!!.detectForVideo(mpImage, currentTimestampMs)
+                    if (result != null) {
+                        resultList.add(result)
+
+                        val galleryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
+                        val file = File(galleryPath, "pose_result_${frameIndex}.png")
+
+                        try {
+                            val poseImage = drawPoseOnImage(mutableBitmap, result)
+                            val outputStream = FileOutputStream(file)
+                            poseImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                            outputStream.flush()
+                            outputStream.close()
+
+                            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                            val contentUri = Uri.fromFile(file)
+                            mediaScanIntent.data = contentUri
+                            context.sendBroadcast(mediaScanIntent)
+
+                            Log.d("PoseAnalysis", "✅ Image saved to gallery: ${file.absolutePath}")
+                        } catch (e: Exception) {
+                            Log.e("PoseAnalysis", "❌ Failed to save image to gallery: ${e.message}")
+                        }
+                    } else {
+                        Log.e("PoseAnalysis", "❌ Pose estimation failed at timestamp $currentTimestampMs")
+                    }
+                } catch (e: Exception) {
+                    didErrorOccurred = true
+                    Log.e("PoseAnalysis", "❌ Error processing frame at $currentTimestampMs: ${e.message}")
+                    e.printStackTrace()
+                    break
+                }
+
+                currentTimestampMs += inferenceIntervalMs
+                frameIndex++
+            }
+
+            Log.d("PoseAnalysis", "🎬 Video processing complete.")
+
+            return if (didErrorOccurred) null else ResultBundle(resultList, 0, height, width)
+
+        } catch (e: Exception) {
+            Log.e("PoseAnalysis", "Error in detectVideoFile: ${e.message}")
+            e.printStackTrace()
+            return null
+        } finally {
+            retriever.release()
+            Log.d("PoseAnalysis", "🔍 retriever released.")
+        }
+    }
+
 
     fun drawPoseOnImage(bitmap: Bitmap, result: PoseLandmarkerResult): Bitmap {
         val canvas = Canvas(bitmap)
@@ -225,98 +317,6 @@ class PoseLandmarkerHelper(
     }
 
 
-    fun detectVideoFile(context: Context, videoUri: Uri): ResultBundle? {
-        val retriever = MediaMetadataRetriever()
-        try {
-            retriever.setDataSource(context, videoUri)
-        } catch (e: Exception) {
-            Log.e("PoseAnalysis", "❌ Failed to set data source: ${e.message}")
-            return null
-        }
-
-        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
-        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
-
-        val videoLengthMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
-        if (videoLengthMs <= 0) {
-            Log.e("PoseAnalysis", "❌ Invalid video length.")
-            return null
-        }
-
-        val inferenceIntervalMs = 200L // 200ms 간격으로 분석
-        var lastTimestampMs = -1L
-        var frameIndex = 0
-        val resultList = mutableListOf<PoseLandmarkerResult>()
-        var didErrorOccurred = false
-
-        while (true) {
-            val timestampMs = frameIndex * inferenceIntervalMs * 1000L
-            if (timestampMs >= videoLengthMs * 1000L) {
-                Log.d("PoseAnalysis", "🎬 Video processing complete. Exiting loop.")
-                break
-            }
-
-            val validTimestampMs = if (lastTimestampMs == -1L) timestampMs else max(timestampMs, lastTimestampMs + inferenceIntervalMs * 1000L)
-
-            val frame = retriever.getFrameAtTime(validTimestampMs, MediaMetadataRetriever.OPTION_CLOSEST)
-            if (frame == null) {
-                Log.e("PoseAnalysis", "❌ Frame at timestamp $validTimestampMs is null")
-                continue
-            } else {
-                Log.d("PoseAnalysis", "✅ Successfully retrieved frame at $validTimestampMs")
-            }
-
-            val argb8888Frame = frame.copy(Bitmap.Config.ARGB_8888, false)
-            val mpImage = BitmapImageBuilder(argb8888Frame).build()
-            val mutableBitmap = argb8888Frame.copy(Bitmap.Config.ARGB_8888, true)
-
-            val mediaPipeTimestamp = validTimestampMs / 1000L
-            Log.d("PoseAnalysis", "📌 detectForVideo() 호출 with timestamp: $mediaPipeTimestamp")
-
-            try {
-                poseLandmarker?.detectForVideo(mpImage, mediaPipeTimestamp)?.let { result ->
-                    resultList.add(result)
-
-                    // 저장할 파일 설정 (갤러리 저장 경로)
-                    val galleryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
-                    val file = File(galleryPath, "pose_result_${frameIndex}.png")
-
-                    try {
-                        val poseImage = drawPoseOnImage(mutableBitmap, result)
-                        val outputStream = FileOutputStream(file)
-                        poseImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                        outputStream.flush()
-                        outputStream.close()
-
-                        // 갤러리에 이미지 추가
-                        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-                        val contentUri = Uri.fromFile(file)
-                        context.sendBroadcast(mediaScanIntent)
-
-                        Log.d("PoseAnalysis", "✅ Image saved to gallery: ${file.absolutePath}")
-                    } catch (e: Exception) {
-                        Log.e("PoseAnalysis", "❌ Failed to save image to gallery: ${e.message}")
-                    }
-                } ?: run {
-                    didErrorOccurred = true
-                    Log.e("PoseAnalysis", "❌ Pose estimation failed at timestamp $mediaPipeTimestamp")
-                    return@run
-                }
-            } catch (e: Exception) {
-                didErrorOccurred = true
-                Log.e("PoseAnalysis", "❌ Error processing frame at $validTimestampMs: ${e.message}")
-                break
-            }
-
-            lastTimestampMs = validTimestampMs
-            frameIndex++
-        }
-
-        retriever.release()
-        Log.d("PoseAnalysis", "🔍 retriever released. Returning results now.")
-
-        return if (didErrorOccurred) null else ResultBundle(resultList, 0, height, width)
-    }
 
     // Accepted a Bitmap and runs pose landmarker inference on it to return
     // results back to the caller
