@@ -24,8 +24,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -92,8 +96,7 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -102,35 +105,35 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.White),
-            verticalAlignment = Alignment.CenterVertically
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "뒤로가기",
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .size(25.dp)
+                    .clickable { context?.finish() },
+                tint = Color.White
+            )
             Text(
                 "공지사항",
-                color = Color.Black,
-                fontSize = 30.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
+                color = Color.White,
+                fontSize = 25.sp,
             )
-            Image(
-                painter = painterResource(R.drawable.pen),
+            Icon(
+                imageVector = Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(end = 20.dp)
+                    .padding(end = 15.dp)
                     .size(30.dp)
                     .clickable {
                         val intent = Intent(context, AddAnnouncementActivity::class.java)
                         launcher.launch(intent)
-                    }
-            )
-            Image(
-                painter = painterResource(R.drawable.x),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(20.dp)
-                    .clickable { context?.finish() }
+                    },
+                tint = Color.White
             )
         }
         Column(
@@ -145,11 +148,12 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                         .clickable {
-                            val intent = Intent(context, DetailAnnouncementActivity::class.java).apply {
-                                putExtra("announcement_title", announcement.first)
-                                putExtra("announcement_content", announcement.second)
-                                putExtra("announcement_date", announcement.third)
-                            }
+                            val intent =
+                                Intent(context, DetailAnnouncementActivity::class.java).apply {
+                                    putExtra("announcement_title", announcement.first)
+                                    putExtra("announcement_content", announcement.second)
+                                    putExtra("announcement_date", announcement.third)
+                                }
                             launcher.launch(intent) // DetailAnnouncementActivity 실행
                         }
                 ) {
