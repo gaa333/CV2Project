@@ -22,7 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -62,8 +66,6 @@ class NoticeActivity: ComponentActivity() {
 @Composable
 fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePreferences) {
     val context = LocalContext.current as? Activity
-//    var notices by remember { mutableStateOf(noticePrefs.loadNotices()) }
-
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -98,45 +100,42 @@ fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePrefere
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(0.1f))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.White),
-            verticalAlignment = Alignment.CenterVertically
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "뒤로가기",
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .size(25.dp)
+                    .clickable { context?.finish() },
+                tint = Color.White
+            )
             Text(
                 "알림장",
-                color = Color.Black,
-                fontSize = 30.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
+                fontSize = 25.sp,
+                color = Color.White
             )
-            Image(
-                painter = painterResource(R.drawable.pen),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(30.dp)
-                    .clickable {
-                        val intent = Intent(context, AddNoticeActivity::class.java)
-                        context?.startActivity(intent)
-                    }
-            )
-            Image(
-                painter = painterResource(R.drawable.x),
+            Icon(
+                imageVector = Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(end = 15.dp)
-                    .size(20.dp)
-                    .clickable { context?.finish() }
+                    .size(30.dp)
+                    .clickable {
+                        val intent = Intent(context, AddNoticeActivity::class.java)
+                        context?.startActivity(intent)},
+                tint = Color.White
             )
         }
         Column(
@@ -162,7 +161,6 @@ fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePrefere
                                 }
                                 launcher.launch(intent)
                             },
-//                        elevation = 4.dp
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("📅 ${notice.date}") // 날짜 표시
