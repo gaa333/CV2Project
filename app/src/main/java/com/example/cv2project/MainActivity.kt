@@ -420,32 +420,6 @@ fun MainScreen() {
     }
 }
 
-fun getAspectRatio(width: Int, height: Int): Int {
-    val previewRatio = max(width, height).toDouble() / min(width, height).toDouble()
-    return if (abs(previewRatio - 4.0 / 3.0) <= abs(previewRatio - 16.0 / 9.0)) {
-        AspectRatio.RATIO_4_3
-    } else {
-        AspectRatio.RATIO_16_9
-    }
-}
-
-@Composable
-fun RequestCameraPermission() {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            if (!granted) {
-                Toast.makeText(context, "카메라 권한이 필요합니다.", Toast.LENGTH_LONG).show()
-            }
-        }
-    )
-
-    LaunchedEffect(Unit) {
-        launcher.launch(android.Manifest.permission.CAMERA)
-    }
-}
-
 @Composable
 fun MenuButton(title: String, imageResId: Int, context: Context, activity: Class<*>) {
     Column(
