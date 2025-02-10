@@ -63,7 +63,17 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 import androidx.camera.core.Preview
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.input.pointer.pointerInput
 import com.google.common.util.concurrent.ListenableFuture
 import kotlin.math.abs
 import kotlin.math.max
@@ -71,15 +81,9 @@ import kotlin.math.min
 
 
 class MainActivity : ComponentActivity() {
-    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
-    private lateinit var poseGLSurfaceView: PoseGLSurfaceView
-    private var videoCapture: VideoCapture<Recorder>? = null
-    private var recording: Recording? = null
-    private var isRecording = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        poseGLSurfaceView = PoseGLSurfaceView(this)
         setContent {
             CV2ProjectTheme {
                 MainScreen()
@@ -88,355 +92,92 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@SuppressLint("CheckResult")
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
-    // 카메라 화면 표시 여부
-    var showCamera by remember { mutableStateOf(false) }
-    var recording: Recording? by remember { mutableStateOf(null) }
-    var isRecording by remember { mutableStateOf(false) }
-//    var videoCapture: VideoCapture<*>? by remember { mutableStateOf(null) }
-//    var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
+    Column(
+        modifier = Modifier
+            .padding(WindowInsets.statusBars.only(WindowInsetsSides.Top).asPaddingValues())
+            .background(Color.Black),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.nextgoal),
+            contentDescription = "앱로고"
+        )
 
-    RequestCameraPermission()
-
-    if (!showCamera) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .weight(0.6f)
+                .background(Color.Unspecified)
+                .padding(10.dp)
         ) {
-            Spacer(modifier = Modifier.weight(0.1f))
+            Image(
+                painter = painterResource(id = R.drawable.hi),
+                contentDescription = "코치 하이",
+                modifier = Modifier
+                    .height(150.dp)
+                    .align(Alignment.Start)
+                    .padding(start = 10.dp, top = 10.dp)
+            )
+            Spacer(modifier = Modifier.weight(0.05f))
+
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.1f),
-                horizontalArrangement = Arrangement.Start
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("싸커노트", color = Color.Black, fontSize = 30.sp)
+                MenuButton(R.drawable.notice, context, NoticeActivity::class.java) //알림장
+                MenuButton(R.drawable.announcement, context, AnnouncementActivity::class.java) //공지사항
+                MenuButton( R.drawable.schedule, context, ScheduleActivity::class.java) //일정표
             }
-
             Spacer(modifier = Modifier.weight(0.1f))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.6f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .background(Color.White)
-                    .padding(10.dp)
-            ) {
-                Text("우리 기관 메뉴", fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp))
-                Spacer(modifier = Modifier.weight(0.1f))
-
-                // 첫 번째 줄 버튼 (각 메뉴마다 다른 이미지 적용)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    MenuButton("알림장", R.drawable.red, context, NoticeActivity::class.java)
-                    MenuButton("공지사항", R.drawable.red, context, AnnouncementActivity::class.java)
-                    MenuButton("일정표", R.drawable.red, context, ScheduleActivity::class.java)
-                }
-
-                Spacer(modifier = Modifier.weight(0.1f))
-
-                // 두 번째 줄 버튼
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    MenuButton("출석부", R.drawable.red, context, AttendanceActivity::class.java)
-                    MenuButton("픽업 서비스", R.drawable.red, context, PickupServiceActivity::class.java)
-                    MenuButton("자세 분석", R.drawable.red, context, PoseAnalysisActivity::class.java)
-                }
-
-                Spacer(modifier = Modifier.weight(0.1f))
-
-                // 세 번째 줄 버튼
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    MenuButton(
-                        "성과 보고서",
-                        R.drawable.red,
-                        context,
-                        PerformanceReportActivity::class.java
-                    )
-                    MenuButton("원비 결제", R.drawable.red, context, PaymentActivity::class.java)
-                    MenuButton(
-                        "학생 관리",
-                        R.drawable.red,
-                        context,
-                        StudentClassListActivity::class.java
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(0.1f))
-
-
-            // 카메라 실행 버튼
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.3f),
-                horizontalArrangement = Arrangement.Center
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Image(
-                    painter = painterResource(R.drawable.camera),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clickable { showCamera = true }
-                )
+                MenuButton( R.drawable.pickup, context, PickupServiceActivity::class.java) //픽업서비스
+                MenuButton( R.drawable.pay, context, PaymentActivity::class.java) //원비결제
+                MenuButton( R.drawable.student, context, StudentClassListActivity::class.java) //학생관리
             }
             Spacer(modifier = Modifier.weight(0.1f))
-        }
-    } else {
-        // 📸 카메라 화면
-        Box(modifier = Modifier.fillMaxSize()) {
-            val context = LocalContext.current
-            val lifecycleOwner = LocalLifecycleOwner.current
-            val previewView = remember { PreviewView(context) }
 
-            val videoCapture = remember {
-                VideoCapture.withOutput(
-                    Recorder.Builder()
-                        .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
-                        .build()
-                )
-            }
-
-            val imageCapture = remember {
-                ImageCapture.Builder().build()
-            }
-
-            LaunchedEffect(Unit) {
-                previewView.scaleType = PreviewView.ScaleType.FIT_END // 또는 FILL_START
-            }
-
-            LaunchedEffect(Unit) {
-                val cameraProvider = ProcessCameraProvider.getInstance(context).get()
-
-                val preview = Preview.Builder()
-//                    .setTargetAspectRatio(getAspectRatio(previewView.width, previewView.height))
-                    .build().apply {
-                        setSurfaceProvider(previewView.surfaceProvider)
-                    }
-
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                try {
-                    cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(
-                        lifecycleOwner,
-                        cameraSelector,
-                        preview,
-                        videoCapture,
-                        imageCapture
-                    )
-                } catch (e: Exception) {
-                    Log.e("CameraScreen", "카메라 바인딩 실패", e)
-                }
-            }
-
-            Column(
-                modifier = Modifier.fillMaxSize()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // 🔼 위쪽 white 바 (뒤로 가기 버튼 포함)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.1f) // 전체 화면의 10% 차지
-                        .background(Color.White),
-                    contentAlignment = Alignment.BottomStart
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.x), // 뒤로가기 버튼 아이콘
-                        contentDescription = "뒤로가기",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(start = 20.dp, bottom = 10.dp)
-                            .clickable {
-                                // 뒤로 가기 기능
-                                showCamera = false
-                            }
-                    )
-                }
-
-                // 📷 카메라 미리보기
-                AndroidView(
-                    factory = { previewView },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.75f)
-                )
-
-                // 🔽 아래쪽 white 바 (사진 촬영 및 비디오 녹화 버튼 포함)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.15f) // 전체 화면의 15% 차지
-                        .background(Color.White),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        // 📸 사진 촬영 버튼
-                        Image(
-                            painter = painterResource(R.drawable.camera),
-                            contentDescription = "사진 촬영",
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clickable {
-                                    imageCapture?.let { capture ->
-                                        val imageContentValues = ContentValues().apply {
-                                            put(
-                                                MediaStore.MediaColumns.DISPLAY_NAME,
-                                                "IMG_${System.currentTimeMillis()}"
-                                            )
-                                            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                                put(
-                                                    MediaStore.Images.Media.RELATIVE_PATH,
-                                                    "Pictures/MyApp"
-                                                )
-                                            }
-                                        }
-
-                                        val outputOptions = ImageCapture.OutputFileOptions.Builder(
-                                            context.contentResolver,
-                                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                            imageContentValues
-                                        ).build()
-
-                                        capture.takePicture(
-                                            outputOptions,
-                                            ContextCompat.getMainExecutor(context),
-                                            object : ImageCapture.OnImageSavedCallback {
-                                                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                                    Log.d(
-                                                        "CameraScreen",
-                                                        "Photo saved: ${outputFileResults.savedUri}"
-                                                    )
-                                                }
-
-                                                override fun onError(exception: ImageCaptureException) {
-                                                    Log.e(
-                                                        "CameraScreen",
-                                                        "Photo capture failed: ${exception.message}",
-                                                        exception
-                                                    )
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                        )
-
-                        // 🎥 비디오 녹화 버튼
-                        Image(
-                            painter = painterResource(id = if (isRecording) R.drawable.blackrect else R.drawable.red),
-                            contentDescription = "비디오 녹화",
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clickable {
-                                    videoCapture?.let { videoCap ->
-                                        if (recording == null) { // 녹화 시작
-                                            val videoContentValues = ContentValues().apply {
-                                                put(
-                                                    MediaStore.MediaColumns.DISPLAY_NAME,
-                                                    "VID_${System.currentTimeMillis()}"
-                                                )
-                                                put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                                    put(
-                                                        MediaStore.Video.Media.RELATIVE_PATH,
-                                                        "Movies/MyApp"
-                                                    )
-                                                }
-                                            }
-
-                                            val mediaStoreOutputOptions =
-                                                MediaStoreOutputOptions.Builder(
-                                                    context.contentResolver,
-                                                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                                                ).setContentValues(videoContentValues).build()
-
-                                            recording = videoCap.output.prepareRecording(
-                                                context,
-                                                mediaStoreOutputOptions
-                                            )
-                                                .start(ContextCompat.getMainExecutor(context)) { recordEvent ->
-                                                    when (recordEvent) {
-                                                        is VideoRecordEvent.Start -> {
-                                                            isRecording = true
-                                                            Log.d(
-                                                                "CameraScreen",
-                                                                "Video recording started"
-                                                            )
-                                                        }
-
-                                                        is VideoRecordEvent.Finalize -> {
-                                                            if (!recordEvent.hasError()) {
-                                                                Log.d(
-                                                                    "CameraScreen",
-                                                                    "Video saved: ${recordEvent.outputResults.outputUri}"
-                                                                )
-                                                            } else {
-                                                                Log.e(
-                                                                    "CameraScreen",
-                                                                    "Video recording error: ${recordEvent.error}"
-                                                                )
-                                                            }
-                                                            isRecording = false
-                                                            recording = null
-                                                        }
-                                                    }
-                                                }
-                                        } else { // 녹화 중이면 중지
-                                            recording?.stop()
-                                            isRecording = false
-                                            recording = null
-                                        }
-                                    }
-                                }
-                        )
-                    }
-                }
+                MenuButton(R.drawable.report, context, PerformanceReportActivity::class.java) //성과보고서
+                MenuButton(R.drawable.pose, context, PoseAnalysisActivity::class.java) //자세분석
             }
+            Spacer(modifier = Modifier.weight(0.1f))
         }
     }
 }
 
 @Composable
-fun MenuButton(title: String, imageResId: Int, context: Context, activity: Class<*>) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.clickable {
-            val intent = Intent(context, activity)
-            context.startActivity(intent)
-        }
-    ) {
-        Image(
-            painter = painterResource(imageResId), // ✅ 각 메뉴마다 다른 이미지 적용
-            contentDescription = title,
-            modifier = Modifier
-                .size(30.dp)
-        )
-        Spacer(modifier = Modifier.size(5.dp))
-        Text(title)
-    }
+fun MenuButton(imageResId: Int, context: Context, activity: Class<*>) {
+    var pressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (pressed) 0.9f else 1f)
+
+    Image(
+        painter = painterResource(imageResId),
+        contentDescription = "메뉴 버튼",
+        modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        pressed = true
+                        tryAwaitRelease()
+                        pressed = false
+                        val intent = Intent(context, activity)
+                        context.startActivity(intent)
+                    }
+                )
+            }
+            .scale(scale)
+            .size(100.dp) // 이미지 크기 조정
+    )
 }
