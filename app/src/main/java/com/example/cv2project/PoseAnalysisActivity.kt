@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAnimationApi::class)
+
 package com.example.cv2project
 
 import VideoEncoder
@@ -65,41 +67,57 @@ import org.tensorflow.lite.support.image.TensorImage
 import java.io.File
 import java.util.concurrent.Executors
 import android.media.MediaCodec
+import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
+import java.io.FileOutputStream
+import kotlin.math.max
+import androidx.compose.foundation.Canvas
 
 class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.LandmarkerListener {
 
+    private val viewModel: PoseAnalysisViewModel by viewModels()
     private var poseLandmarkerHelper: PoseLandmarkerHelper? = null
-    private var selectedVideoUri: Uri? = null
     private val executorService = Executors.newSingleThreadExecutor()
-    private var processedVideoUri by mutableStateOf<Uri?>(null)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
+//                val viewModel: PoseAnalysisViewModel = viewModel()
+
             CV2ProjectTheme {
+                val frames by viewModel.frames.collectAsState(initial = emptyList())
                 PoseAnalysisScreen(
-                    onSelectVideo = { openGallery() },
-                    videoUri = selectedVideoUri,
-                    processedVideoUri = processedVideoUri
+                    onSelectVideo = { openGallery(viewModel) },
+                    frames = frames
                 )
             }
         }
     }
 
-    private fun openGallery() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "video/*"
-        }
+    private fun openGallery(viewModel: PoseAnalysisViewModel) {
+        val intent = Intent(Intent.ACTION_PICK).apply { type = "video/*" }
         videoPickerLauncher.launch(intent)
     }
 
     private val videoPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == RESULT_OK) {
                 result.data?.data?.let { uri ->
-                    selectedVideoUri = uri
                     processVideo(uri)
                 }
             }
@@ -108,15 +126,12 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
     private fun processVideo(videoUri: Uri) {
         val retriever = MediaMetadataRetriever()
         executorService.execute {
-            val outputFile = File(getExternalFilesDir(Environment.DIRECTORY_MOVIES), "pose_result.mp4")
-            val encoder = VideoEncoder(outputFile, 320, 240, 15)
-
             try {
-                encoder.start()
                 retriever.setDataSource(this@PoseAnalysisActivity, videoUri)
-                val videoLengthMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
-
-                val inferenceIntervalMs = 300L
+                val videoLengthMs =
+                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                        ?.toLong() ?: 0
+                val inferenceIntervalMs = 100L
                 val numFrames = (videoLengthMs / inferenceIntervalMs).toInt()
 
                 poseLandmarkerHelper = PoseLandmarkerHelper(
@@ -126,53 +141,74 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
                     poseLandmarkerHelperListener = this@PoseAnalysisActivity
                 )
 
-                var currentTimestampMs = 0L
+                val frameList = mutableListOf<Bitmap>()
+                var lastTimestampMs = -1L
+
                 for (i in 0 until numFrames) {
-                    val timestampMs = i * inferenceIntervalMs
-                    val frame = retriever.getFrameAtTime(timestampMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                    val timestampMs = i * inferenceIntervalMs * 1000L
+                    val validTimestampMs = if (lastTimestampMs == -1L) timestampMs else max(
+                        timestampMs,
+                        lastTimestampMs + inferenceIntervalMs * 1000L
+                    )
 
-                    frame?.let {
-                        // Convert the bitmap to ARGB_8888 format
-                        val argb8888Frame = it.copy(Bitmap.Config.ARGB_8888, true)
+                    val frame = retriever.getFrameAtTime(
+                        validTimestampMs,
+                        MediaMetadataRetriever.OPTION_CLOSEST
+                    )
 
-                        val result = poseLandmarkerHelper?.detectImage(argb8888Frame)
-
-                        result?.results?.firstOrNull()?.let { poseResult ->
-                            val processedBitmap = drawPoseOnImage(argb8888Frame, poseResult)
-                            encoder.encodeFrame(processedBitmap)
-                        }
-
-                        // Recycle the bitmaps to free up memory
-                        it.recycle()
-                        argb8888Frame.recycle()
+                    if (frame == null) {
+                        Log.e("PoseAnalysis", "❌ Frame at timestamp $validTimestampMs is null")
+                        continue
+                    } else {
+                        Log.d("PoseAnalysis", "✅ Successfully retrieved frame at $validTimestampMs")
                     }
-                    currentTimestampMs += inferenceIntervalMs
+
+                    val argb8888Frame = frame.copy(Bitmap.Config.ARGB_8888, true)
+
+                    // ✅ Pose 추정 후 새로운 이미지 저장
+                    val result = poseLandmarkerHelper?.detectImage(argb8888Frame)
+                    result?.results?.firstOrNull()?.let { poseResult ->
+                        val processedBitmap = drawPoseOnImage(argb8888Frame, poseResult)
+                        frameList.add(processedBitmap)
+
+                        // ✅ 저장된 프레임 로그 출력
+                        val savedPath = saveBitmap(processedBitmap, "frame_$i.png")
+                        Log.d("PoseAnalysis", "✅ Frame $i saved at: $savedPath")
+                    }
+
+                    lastTimestampMs = validTimestampMs
                 }
 
-                encoder.finish()
-                processedVideoUri = Uri.fromFile(outputFile)
-                Log.d("PoseAnalysis", "✅ Video processing complete. Output file: $outputFile")
+                runOnUiThread {
+                    viewModel.setFrames(frameList)
+                    Log.d("PoseAnalysisViewModel", "✅ Frames sent to ViewModel: ${frameList.size}")
+                }
 
             } catch (e: Exception) {
                 Log.e("PoseAnalysis", "❌ Video processing failed: ${e.message}", e)
-                runOnUiThread {
-                    Toast.makeText(this@PoseAnalysisActivity, "Video processing failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
             } finally {
-                try {
-                    encoder.finish()
-                } catch (e: Exception) {
-                    Log.e("PoseAnalysis", "❌ Encoder finish failed: ${e.message}", e)
-                }
-                try {
-                    retriever.release()
-                } catch (e: Exception) {
-                    Log.e("PoseAnalysis", "❌ Retriever release failed: ${e.message}", e)
-                }
+                retriever.release()
                 poseLandmarkerHelper?.clearPoseLandmarker()
             }
         }
     }
+
+    private fun saveBitmap(bitmap: Bitmap, filename: String): String {
+        val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "PoseFrames")
+        if (!directory.exists()) directory.mkdirs()
+
+        val file = File(directory, filename)
+        try {
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+        } catch (e: Exception) {
+            Log.e("PoseAnalysis", "❌ Failed to save image: ${e.message}")
+        }
+        return file.absolutePath
+    }
+
 
     private fun drawPoseOnImage(bitmap: Bitmap, result: PoseLandmarkerResult): Bitmap {
         val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -202,7 +238,11 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
 
         result.landmarks().forEach { landmark ->
             landmark.forEach { point ->
-                canvas.drawPoint(point.x() * mutableBitmap.width, point.y() * mutableBitmap.height, paint)
+                canvas.drawPoint(
+                    point.x() * mutableBitmap.width,
+                    point.y() * mutableBitmap.height,
+                    paint
+                )
             }
 
             for ((startIdx, endIdx) in connections) {
@@ -218,344 +258,78 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
         return mutableBitmap
     }
 
+    //
     override fun onError(error: String, errorCode: Int) {
-        Log.e("PoseAnalysis", "Error: $error")
+        Log.e("PoseAnalysis", "Error: $error (Code: $errorCode)")
         runOnUiThread {
             Toast.makeText(this, "Error: $error", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
-        Log.d("PoseAnalysis", "Pose Detected: ${resultBundle.results.size}")
+        Log.d("PoseAnalysis", "Pose detected: ${resultBundle.results.size}")
     }
 
-    @Composable
-    fun PoseAnalysisScreen(onSelectVideo: () -> Unit, videoUri: Uri?, processedVideoUri: Uri?) {
-        val context = LocalContext.current
-
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(onClick = onSelectVideo) {
-                Text("Select Video from Gallery")
-            }
-
-            videoUri?.let {
-                Text(text = "Selected video: $videoUri")
-            }
-
-            Spacer(modifier = Modifier.size(16.dp))
-
-            processedVideoUri?.let {
-                Text("Processed Video:")
-                VideoPlayer(uri = it)
-            }
-
-            Button(onClick = { finish() }) {
-                Text("Back")
-            }
-        }
-    }
-
-    @Composable
-    fun VideoPlayer(uri: Uri) {
-        val context = LocalContext.current
-        val exoPlayer = remember {
-            ExoPlayer.Builder(context).build().apply {
-                setMediaItem(MediaItem.fromUri(uri))
-                prepare()
-            }
-        }
-
-        AndroidView(
-            factory = { ctx ->
-                PlayerView(ctx).apply {
-                    player = exoPlayer
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp)
-        )
-    }
 }
 
-/**
- * ExoPlayer로 비디오 재생
- */
+
 @Composable
-fun VideoPlayer(uri: Uri) {
-    val context = LocalContext.current
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(uri))
-            prepare()
+fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>) {
+    val context = LocalContext.current as? Activity
+    var currentFrameIndex by remember { mutableStateOf(0) }
+
+    LaunchedEffect(frames) {
+        while (frames.isNotEmpty()) {
+            delay(500L) // Control the frame rate
+            currentFrameIndex = (currentFrameIndex + 1) % frames.size
+            Log.d("FrameUpdate", "✅ Current frame index updated: $currentFrameIndex") // 로그 추가
         }
     }
 
-    AndroidView(
-        factory = { ctx ->
-            PlayerView(ctx).apply {
-                player = exoPlayer
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+        ) {
+            if (frames.isNotEmpty()) {
+                PoseAnimation(frames)
+            } else {
+                Text("no frames")
             }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp)
-    )
+        }
+
+        Button(onClick = onSelectVideo) {
+            Text("Select Video from Gallery")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = { }) {
+            Text("Back")
+        }
+    }
 }
 
+@Composable
+fun PoseAnimation(frames: List<Bitmap>) {
+    var currentFrameIndex by remember { mutableStateOf(0) }
 
-//// 자세 분석
-//@Composable
-//fun PoseAnalysisScreen() {
-//    val context = LocalContext.current as? Activity
-//    val coroutineScope = rememberCoroutineScope()
-//    var videoUri by remember { mutableStateOf<Uri?>(null) }
-//    var analyzedImage by remember { mutableStateOf<Bitmap?>(null) }
-//    var analyzedFrames by remember { mutableStateOf<List<Bitmap>>(emptyList()) }
-//    // ✅ 갤러리에서 영상 선택하는 런처
-//    val pickVideoLauncher =
-//        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-//            videoUri = uri
-//        }
-//
-//
-//
-//
-//    Column(
-//        modifier = Modifier.fillMaxSize(),
-////        verticalArrangement = Arrangement.Top,
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Text("자세 분석", fontSize = 40.sp)
-//
-//        // "영상 선택" 버튼
-//        Button(
-//            onClick = {
-//                pickVideoLauncher.launch("video/*")
-//            }
-//        ) {
-//            Text("갤러리에서 영상 선택")
-//        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        Column(
-//            modifier = Modifier
-//                .height(200.dp)
-//                .fillMaxWidth()
-//        ) {
-//            // 선택한 영상 표시
-//            videoUri?.let {
-//                VideoPlayer(uri = it)
-//            }
-//        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-////        // "영상 분석" 버튼
-////        Button(onClick = {
-////            videoUri?.let { uri ->
-////                coroutineScope.launch {
-////                    analyzedFrames = context?.let { processVideo(it, uri) }!!
-////                }
-////            }
-////        }) {
-////            Text("영상 분석")
-////        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-////        Column(
-////            modifier = Modifier
-////                .fillMaxSize()
-////                .background(color = androidx.compose.ui.graphics.Color.LightGray)
-////        ) {
-////            // ✅ 분석된 결과 표시
-////            // 분석된 프레임 표시
-////            LazyRow {
-////                itemsIndexed(analyzedFrames) { index, bitmap ->
-////                    Image(
-////                        bitmap = bitmap.asImageBitmap(),
-////                        contentDescription = "Analyzed Frame ${index + 1}",
-////                        modifier = Modifier
-////                            .width(200.dp)
-////                            .height(300.dp)
-////                    )
-////                }
-////            }
-////        }
-//
-//        Button(
-//            onClick = {
-//                context?.finish()
-//            }
-//        ) {
-//            Text("뒤로")
-//        }
-//    }
-//}
-//
-//@Composable
-//fun VideoPlayer(uri: Uri) {
-//    val context = LocalContext.current
-//    val exoPlayer = remember {
-//        ExoPlayer.Builder(context).build().apply {
-//            setMediaItem(MediaItem.fromUri(uri))
-//            prepare()
-//        }
-//    }
-//
-//    AndroidView(
-//        factory = { ctx ->
-//            PlayerView(ctx).apply {
-//                player = exoPlayer
-//            }
-//        },
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(200.dp) // ✅ 화면 중앙에 배치
-//    )
-//}
-//
-////suspend fun processVideo(context: Context, uri: Uri): List<Bitmap> = withContext(Dispatchers.Default) {
-////    val resultBitmaps = mutableListOf<Bitmap>()
-////
-////    try {
-////        val baseOptions = BaseOptions.builder()
-////            .setModelAssetPath("pose_landmarker/pose_landmarker_lite.task")
-////            .build()
-////        val options = PoseLandmarker.PoseLandmarkerOptions.builder()
-////            .setBaseOptions(baseOptions)
-////            .setRunningMode(RunningMode.VIDEO)
-////            .build()
-////
-////        PoseLandmarker.createFromOptions(context, options)?.use { poseLandmarker ->
-////            val retriever = MediaMetadataRetriever()
-////            retriever.setDataSource(context, uri)
-////
-////            val frameRate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)?.toFloatOrNull() ?: 30f
-////            val durationMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
-////
-////            for (timeMs in 0L..durationMs step (1000 / frameRate).toLong()) {
-////                val bitmap = retriever.getFrameAtTime(timeMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-////                bitmap?.let {
-////                    val mpImage = BitmapImageBuilder(it).build()
-////                    val result = poseLandmarker.detectForVideo(mpImage, timeMs)
-////                    val processedBitmap = drawPoseOnBitmap(it, result)
-////                    resultBitmaps.add(processedBitmap)
-////                    Log.d("ProcessVideo", "Processed frame at $timeMs ms")
-////                }
-////            }
-////
-////            retriever.release()
-////        }
-////    } catch (e: Exception) {
-////        Log.e("ProcessVideo", "Error processing video", e)
-////    }
-////
-////    resultBitmaps
-////}
-////
-////fun drawPoseOnBitmap(bitmap: Bitmap, result: PoseLandmarkerResult): Bitmap {
-////    val outputBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-////    val canvas = Canvas(outputBitmap)
-////    val paint = Paint().apply {
-////        color = Color.RED
-////        strokeWidth = 3f
-////        style = Paint.Style.STROKE
-////    }
-////
-////    result.landmarks().forEach { poseLandmarks ->
-////        poseLandmarks.forEach { landmark ->
-////            val x = landmark.x() * bitmap.width
-////            val y = landmark.y() * bitmap.height
-////            canvas.drawCircle(x, y, 5f, paint)
-////        }
-////    }
-////
-////    return outputBitmap
-////}
-//
-//
-///*
-//fun processVideo(context: android.content.Context, videoUri: Uri): Bitmap? {
-//    val retriever = MediaMetadataRetriever()
-//    retriever.setDataSource(context, videoUri)
-//
-//    // ✅ 첫 번째 프레임을 가져와서 분석
-//    val frameBitmap: Bitmap? =
-//        retriever.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST) // 1초 후 프레임
-//    retriever.release()
-//
-//    frameBitmap?.let { bitmap ->
-//        return applyPoseEstimation(context, bitmap)
-//    }
-//    return null
-//}
-//
-//fun applyPoseEstimation(context: Context, bitmap: Bitmap): Bitmap {
-//    // MediaPipe Pose Landmarker 초기화
-//    val baseOptions = BaseOptions.builder()
-//        .setModelAssetPath("assets/pose_landmarker_lite.task")
-//        .build()
-//
-//    val minPoseDetectionConfidence = 0.1f
-//    val minPosePresenceConfidence = 0.1f
-//    val minTrackingConfidence = 0.1f
-//    val maxNumPoses = 1
-//
-//
-//    val options = PoseLandmarker.PoseLandmarkerOptions.builder()
-//        .setBaseOptions(baseOptions)
-//        .setMinPoseDetectionConfidence(minPoseDetectionConfidence)
-//        .setMinPosePresenceConfidence(minPosePresenceConfidence)
-//        .setMinTrackingConfidence(minTrackingConfidence)
-//        .setNumPoses(maxNumPoses)
-//        .setOutputSegmentationMasks(false)
-//        .setRunningMode(RunningMode.IMAGE)
-//        .build()
-//
-//
-//    val poseLandmarker = PoseLandmarker.createFromOptions(context, options)
-//
-//    // Bitmap을 MPImage로 변환
-//    val mpImage = BitmapImageBuilder(bitmap).build()
-//
-//    // MPImage 입력으로 포즈 감지 수행
-//    val result = poseLandmarker.detect(mpImage)
-//
-//    // 감지된 결과를 비트맵에 오버레이
-//    return drawPoseOnBitmap(bitmap, result)
-//}
-//
-//
-//// ✅ 포즈 데이터를 비트맵에 오버레이
-//fun drawPoseOnBitmap(bitmap: Bitmap, result: PoseLandmarkerResult): Bitmap {
-//    val newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true) ?: Bitmap.createBitmap(
-//        bitmap.width,
-//        bitmap.height,
-//        Bitmap.Config.ARGB_8888
-//    )
-//    val canvas = Canvas(newBitmap)
-//    val paint = Paint().apply {
-//        color = Color.RED
-//        style = Paint.Style.FILL
-//        strokeWidth = 5f
-//    }
-//
-//    // 최신 API에 맞게 수정
-//    result.landmarks().forEach { poseLandmarks ->
-//        poseLandmarks.forEach { landmark ->
-//            val x = (landmark.x() * newBitmap.width).toInt()
-//            val y = (landmark.y() * newBitmap.height).toInt()
-//            canvas.drawCircle(x.toFloat(), y.toFloat(), 8f, paint)
-//        }
-//    }
-//
-//    return newBitmap
-//}
-//*/
+    // 일정한 간격으로 프레임을 업데이트
+    LaunchedEffect(frames) {
+        while (true) {
+            delay(100L) // 100ms마다 프레임 변경 (FPS 10)
+            currentFrameIndex = (currentFrameIndex + 1) % frames.size
+        }
+    }
+
+    Canvas(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (frames.isNotEmpty()) {
+            val frame = frames[currentFrameIndex]
+            drawImage(frame.asImageBitmap())
+        }
+    }
+}

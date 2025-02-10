@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.cv2project"
-        minSdk = 33
+        minSdk = 28
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -84,5 +84,6 @@ dependencies {
     implementation ("androidx.media3:media3-transformer:1.5.1")
 
     implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
 }

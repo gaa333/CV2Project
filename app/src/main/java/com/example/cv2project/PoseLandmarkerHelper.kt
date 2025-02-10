@@ -230,7 +230,7 @@ class PoseLandmarkerHelper(
                 return null
             }
 
-            val inferenceIntervalMs = 200L // 200ms 간격으로 분석
+            val inferenceIntervalMs = 100L // 200ms 간격으로 분석
             val resultList = mutableListOf<PoseLandmarkerResult>()
             var didErrorOccurred = false
 
