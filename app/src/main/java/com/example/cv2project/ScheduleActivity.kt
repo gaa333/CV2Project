@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -65,6 +66,7 @@ class ScheduleActivity : ComponentActivity() {
     }
 }
 
+// 일정표
 @Composable
 fun ScheduleScreen() {
     val context = LocalContext.current as? Activity
@@ -105,7 +107,7 @@ fun ScheduleScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.LightGray),
+                .background(color = Color.Black),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Absolute.SpaceBetween
         ) {
@@ -115,18 +117,21 @@ fun ScheduleScreen() {
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { context?.finish() }
+                    .clickable { context?.finish() },
+                tint = Color.White
             )
             Text(
                 text = "일정표",
-                fontSize = 25.sp
+                fontSize = 25.sp,
+                color = Color.White
             )
-            Icon( // 없애야됨
+            Icon(
                 imageVector = Icons.Default.Share,
-                contentDescription = "반 추가",
+                contentDescription = "공유",
                 modifier = Modifier
                     .padding(end = 15.dp)
-                    .size(25.dp)
+                    .size(25.dp),
+                tint = Color.White
             )
         }
 
@@ -144,9 +149,12 @@ fun ScheduleScreen() {
 
         Button(
             onClick = { showDialog = true },
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black
+            )
         ) {
-            Text("일정 추가")
+            Text("일정 추가", color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -165,7 +173,7 @@ fun ScheduleScreen() {
                     Spacer(modifier = Modifier.weight(1f))
                     IconButton(onClick = {
                         scheduleData.remove(schedule)
-                        saveSchedules() // 일정 삭제 후 저장
+                        saveSchedules()
                     }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -212,16 +220,21 @@ fun AddScheduleDialog(
         title = { Text("새 일정 추가") },
         text = {
             Column {
-                Button(onClick = {
-                    val calendar = Calendar.getInstance()
-                    TimePickerDialog(
-                        context,
-                        { _, hour, minute -> time = String.format("%02d%02d", hour, minute) },
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        true
-                    ).show()
-                }) {
+                Button(
+                    onClick = {
+                        val calendar = Calendar.getInstance()
+                        TimePickerDialog(
+                            context,
+                            { _, hour, minute -> time = String.format("%02d%02d", hour, minute) },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            true
+                        ).show()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black
+                    )
+                ) {
                     Text("시간 선택: ${if (time.isEmpty()) "선택 안 됨" else formatTime(time)}")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -238,13 +251,21 @@ fun AddScheduleDialog(
                     if (time.isNotEmpty() && event.isNotEmpty()) {
                         onAddSchedule(Schedule(selectedDate, time, event))
                     }
-                }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                )
             ) {
                 Text("추가")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                )
+            ) {
                 Text("취소")
             }
         }

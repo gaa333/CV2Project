@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,7 +55,7 @@ fun PickupServiceScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.LightGray),
+                .background(color = Color.Black),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -66,19 +65,18 @@ fun PickupServiceScreen() {
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { context?.finish() }
+                    .clickable { context?.finish() },
+                tint = Color.White
             )
             Text(
-                "픽업 서비스",
-                fontSize = 25.sp
-            )
-            Image(
-                painter = painterResource(R.drawable.x),
-                contentDescription = null,
+                "픽업 서비스", fontSize = 25.sp, color = Color.White)
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "공유",
                 modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(20.dp)
-                    .clickable { context?.finish() }
+                    .padding(end = 15.dp)
+                    .size(25.dp),
+                tint = Color.White
             )
         }
         Spacer(modifier = Modifier.weight(0.1f))

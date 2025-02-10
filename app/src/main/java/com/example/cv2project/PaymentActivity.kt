@@ -1,13 +1,11 @@
 package com.example.cv2project
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,11 +24,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -43,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -97,7 +93,7 @@ fun PaymentScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .background(color = Color.LightGray),
+                    .background(color = Color.Black),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -107,20 +103,17 @@ fun PaymentScreen() {
                     modifier = Modifier
                         .padding(start = 15.dp)
                         .size(25.dp)
-                        .clickable { context?.finish() }
+                        .clickable { context?.finish() },
+                    tint = Color.White
                 )
-                Text(
-                    "원비 결제",
-                    color = Color.Black,
-                    fontSize = 25.sp
-                )
+                Text("원비 결제",color = Color.White,fontSize = 25.sp)
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "공유",
                     modifier = Modifier
                         .padding(end = 15.dp)
-                        .size(30.dp)
-                        .clickable {}
+                        .size(25.dp),
+                    tint = Color.White
                 )
             }
 
@@ -278,12 +271,16 @@ fun PaymentScreen() {
                         .height(60.dp)
                         .padding(10.dp),
                     onClick = {
-                        Toast.makeText(context, "발송 완료~", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "발송 완료 :)", Toast.LENGTH_SHORT).show()
                     },
-                    enabled = isButtonEnabled
+                    enabled = isButtonEnabled,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black // Set the button background color to black
+                    )
                 ) {
-                    Text("청구서 발송하기", fontSize = 18.sp, color = Color.White)
+                    Text("청구서 발송하기", fontSize = 18.sp, color = Color.White) // Set the text color to white
                 }
+
             }
         }
     }
@@ -360,8 +357,8 @@ fun InputPopup(
                     border = BorderStroke(0.01.dp, Color.Black),
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD2F0FF),
-                        contentColor = Color.Black
+                        containerColor = Color.Black,
+                        contentColor = Color.White
                     ),
                     modifier = Modifier
                         .width(100.dp)
@@ -374,8 +371,8 @@ fun InputPopup(
                     border = BorderStroke(0.01.dp, Color.Black),
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD2F0FF),
-                        contentColor = Color.Black
+                        containerColor = Color.Black,
+                        contentColor = Color.White
                     ),
                     modifier = Modifier
                         .width(100.dp)

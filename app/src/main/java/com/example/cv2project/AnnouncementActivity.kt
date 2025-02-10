@@ -8,12 +8,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +24,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -40,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cv2project.preferences.AnnouncementPreferences
@@ -97,7 +92,6 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
-//            .background(color = Color.LightGray),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -106,7 +100,7 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.LightGray),
+                .background(color = Color.Black),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -116,11 +110,12 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { context?.finish() }
+                    .clickable { context?.finish() },
+                tint = Color.White
             )
             Text(
                 "공지사항",
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 25.sp,
             )
             Icon(
@@ -132,7 +127,8 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
                     .clickable {
                         val intent = Intent(context, AddAnnouncementActivity::class.java)
                         launcher.launch(intent)
-                    }
+                    },
+                tint = Color.White
             )
         }
         Column(
@@ -157,15 +153,15 @@ fun AnnouncementScreen(announcementPrefs: AnnouncementPreferences) {
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = announcement.first, // 제목
+                            text = announcement.first,
                             fontSize = 18.sp,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = announcement.second, fontSize = 14.sp) // 내용
+                        Text(text = announcement.second, fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = announcement.third, // 날짜
+                            text = announcement.third,
                             fontSize = 12.sp,
                             color = Color.Gray
                         )

@@ -9,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,17 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -61,15 +53,11 @@ class StudentManagementActivity : ComponentActivity() {
     }
 }
 
+// 학생 프로필 목록
 @Composable
 fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName: String) {
     val context = LocalContext.current as? Activity
-    var students by remember { mutableStateOf(studentPrefs.loadStudents()) }
     var isAddingStudent by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    var age by remember { mutableStateOf("") }
-    var showDialog by remember { mutableStateOf(false) }
-    var selectedStudent by remember { mutableStateOf<Student?>(null) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -79,7 +67,7 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.LightGray),
+                .background(color = Color.Black),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -89,15 +77,15 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { context?.finish() }
+                    .clickable { context?.finish() },
+                tint = Color.White
             )
             Text(
                 text = "학생 프로필", //"$selectedClassName 반"
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 25.sp,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
-
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = null,
@@ -106,11 +94,12 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
                     .size(25.dp)
                     .clickable {
                         isAddingStudent = true
-                    }
+                    },
+                tint = Color.White
             )
         }
+        Spacer(modifier = Modifier.height(15.dp))
 
-        //
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Top,
@@ -118,173 +107,33 @@ fun StudentManagementScreen(studentPrefs: StudentPreferences, selectedClassName:
         ) {
             Image(
                 painter = painterResource(id = R.drawable.profile2),
-                contentDescription = "2학년반",
+                contentDescription = "검색",
+                modifier = Modifier.padding(start = 5.dp, end = 5.dp)
             )
+            Spacer(modifier = Modifier.height(15.dp))
+
             Image(
                 painter = painterResource(id = R.drawable.profile3),
-                contentDescription = "3학년반",
+                contentDescription = "음바페",
+                modifier = Modifier
+                    .clickable {
+                        val intent = Intent(context, StudentDetailActivity::class.java)
+                        intent.putExtra("student_name", "음바페")
+                        context?.startActivity(intent)
+                    }
             )
             Image(
                 painter = painterResource(id = R.drawable.profile4),
-                contentDescription = "3학년반",
-            )
+                contentDescription = "손흥민")
             Image(
                 painter = painterResource(id = R.drawable.profile5),
-                contentDescription = "4학년반",
-            )
+                contentDescription = "호날두")
             Image(
                 painter = painterResource(id = R.drawable.profile6),
-                contentDescription = "5학년반",
-            )
+                contentDescription = "메시")
             Image(
                 painter = painterResource(id = R.drawable.profile7),
-                contentDescription = "6학년반",
-            )
-        }
-
-        //
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 20.dp)
-        ) {
-            // 학생 리스트
-            students.forEach { student ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable {
-                            val intent = Intent(context, StudentDetailActivity::class.java).apply {
-                                putExtra("student_name", student.name)
-                                putExtra("student_age", student.age)
-                            }
-                            context?.startActivity(intent)
-                        },
-//                    elevation = 4.dp
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("${student.name}, ${student.age}세")
-
-                        Image(
-                            painter = painterResource(id = R.drawable.delete), // 휴지통 이미지
-                            contentDescription = "삭제",
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clickable {
-                                    selectedStudent = student
-                                    showDialog = true
-                                }
-                        )
-
-                        if (showDialog) {
-                            AlertDialog(
-                                onDismissRequest = { showDialog = false },
-                                title = { Text("학생 정보 삭제") },
-                                text = { Text("학생 정보가 영구적으로 삭제됩니다. \n삭제하시겠습니까?") },
-                                confirmButton = {
-                                    Button(
-                                        onClick = {
-                                            selectedStudent?.let { studentToDelete ->
-                                                val updatedStudents = students.toMutableList()
-                                                updatedStudents.remove(studentToDelete) // 학생 객체를 직접 삭제
-                                                studentPrefs.saveStudents(updatedStudents)
-                                                students = updatedStudents
-                                            }
-                                            showDialog = false // 다이얼로그 닫기
-                                            selectedStudent = null
-                                        }) {
-                                        Text("삭제")
-                                    }
-                                },
-                                dismissButton = {
-                                    Button(
-                                        onClick = {
-                                            showDialog = false
-                                            selectedStudent = null
-                                        }
-                                    ) {
-                                        Text("취소")
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (isAddingStudent) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("이름") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = age,
-                    onValueChange = { age = it },
-                    label = { Text("나이") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Button(
-                        onClick = {
-                            name = ""
-                            age = ""
-                            isAddingStudent = false
-                        }
-                    ) {
-                        Text("취소")
-                    }
-
-                    Button(
-                        onClick = {
-                            if (name.isNotEmpty() && age.isNotEmpty()) {
-                                val updatedStudents = students.toMutableList()
-                                updatedStudents.add(Student(name, age.toInt()))
-                                studentPrefs.saveStudents(updatedStudents)
-                                students = updatedStudents
-                                name = ""
-                                age = ""
-                                isAddingStudent = false
-                            }
-                        }
-                    ) {
-                        Text("저장")
-                    }
-                }
-            }
+                contentDescription = "네이마르")
         }
     }
 }

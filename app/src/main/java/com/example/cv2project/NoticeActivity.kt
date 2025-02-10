@@ -8,19 +8,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -36,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cv2project.preferences.Notice
@@ -67,7 +63,6 @@ class NoticeActivity: ComponentActivity() {
 @Composable
 fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePreferences) {
     val context = LocalContext.current as? Activity
-//    var notices by remember { mutableStateOf(noticePrefs.loadNotices()) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -104,7 +99,6 @@ fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePrefere
     Column(
         modifier = Modifier
             .fillMaxSize(),
-//            .background(color = Color.LightGray),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -112,7 +106,7 @@ fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePrefere
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.LightGray),
+                .background(color = Color.Black),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -122,13 +116,15 @@ fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePrefere
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { context?.finish() }
+                    .clickable { context?.finish() },
+                tint = Color.White
             )
             Text(
                 "알림장",
                 fontSize = 25.sp,
+                color = Color.White
             )
-            Image(
+            Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier
@@ -136,8 +132,8 @@ fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePrefere
                     .size(30.dp)
                     .clickable {
                         val intent = Intent(context, AddNoticeActivity::class.java)
-                        context?.startActivity(intent)
-                    }
+                        context?.startActivity(intent)},
+                tint = Color.White
             )
         }
         Column(
@@ -163,10 +159,9 @@ fun NoticeScreen(notices: MutableState<List<Notice>>, noticePrefs: NoticePrefere
                                 }
                                 launcher.launch(intent)
                             },
-//                        elevation = 4.dp
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("📅 ${notice.date}") // 날짜 표시
+                            Text("📅 ${notice.date}")
                             Text("🎓 학생: ${notice.studentName}")
                             Text("📝 제목: ${notice.title}")
                             Text("📄 내용: ${notice.content}")

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorFilter
 import android.graphics.Paint
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -30,8 +29,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -48,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -59,18 +55,12 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 import com.google.mediapipe.framework.image.BitmapImageBuilder
-import com.google.mediapipe.framework.image.MPImage
 import com.google.mediapipe.tasks.core.BaseOptions
-import com.google.mediapipe.tasks.vision.core.BaseVisionTaskApi
-import com.google.mediapipe.tasks.vision.core.ImageProcessingOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
-import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.tensorflow.lite.support.image.TensorImage
 
 class PoseAnalysisActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,16 +77,12 @@ class PoseAnalysisActivity : ComponentActivity() {
 @Composable
 fun PoseAnalysisScreen() {
     val context = LocalContext.current as? Activity
-    val coroutineScope = rememberCoroutineScope()
     var videoUri by remember { mutableStateOf<Uri?>(null) }
-    var analyzedImage by remember { mutableStateOf<Bitmap?>(null) }
-    var analyzedFrames by remember { mutableStateOf<List<Bitmap>>(emptyList()) }
 
     // 갤러리에서 영상 선택
     val pickVideoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            videoUri = uri
-        }
+            videoUri = uri }
 
     Column(
         modifier = Modifier
@@ -122,11 +108,8 @@ fun PoseAnalysisScreen() {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            "실시간 동작 분석",
-            fontSize = 25.sp,
-            color = androidx.compose.ui.graphics.Color.White
-        )
+        Text("실시간 동작 분석", fontSize = 25.sp, color = androidx.compose.ui.graphics.Color.White )
+
         Text(
             "학생 영상을 넣어보세요",
             fontSize = 18.sp,
