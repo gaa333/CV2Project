@@ -525,7 +525,7 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                 ImageCapture.Builder().build()
             }
             LaunchedEffect(Unit) {
-                previewView.scaleType = PreviewView.ScaleType.FIT_END // 또는 FILL_START
+                previewView.scaleType = PreviewView.ScaleType.FILL_START // 또는 FILL_START
             }
             LaunchedEffect(Unit) {
                 val cameraProvider = ProcessCameraProvider.getInstance(context).get()
