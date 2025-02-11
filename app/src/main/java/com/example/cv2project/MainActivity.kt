@@ -90,8 +90,12 @@ fun MainScreen() {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 MenuButton(R.drawable.notice, context, NoticeActivity::class.java) //알림장
-                MenuButton(R.drawable.announcement, context, AnnouncementActivity::class.java) //공지사항
-                MenuButton( R.drawable.schedule, context, ScheduleActivity::class.java) //일정표
+                MenuButton(
+                    R.drawable.announcement,
+                    context,
+                    AnnouncementActivity::class.java
+                ) //공지사항
+                MenuButton(R.drawable.schedule, context, ScheduleActivity::class.java) //일정표
             }
             Spacer(modifier = Modifier.weight(0.05f))
 
@@ -99,9 +103,9 @@ fun MainScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                MenuButton( R.drawable.pickup, context, PickupServiceActivity::class.java) //픽업서비스
-                MenuButton( R.drawable.pay, context, PaymentActivity::class.java) //원비결제
-                MenuButton( R.drawable.student, context, StudentClassListActivity::class.java) //학생관리
+                MenuButton(R.drawable.pickup, context, PickupServiceActivity::class.java) //픽업서비스
+                MenuButton(R.drawable.pay, context, PaymentActivity::class.java) //원비결제
+                MenuButton(R.drawable.student, context, StudentClassListActivity::class.java) //학생관리
             }
             Spacer(modifier = Modifier.weight(0.05f))
 
@@ -109,8 +113,12 @@ fun MainScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                MenuButton(R.drawable.report, context, PerformanceReportActivity::class.java) //성과보고서
                 MenuButton(R.drawable.pose, context, PoseAnalysisActivity::class.java) //자세분석
+                MenuButton(
+                    R.drawable.report,
+                    context,
+                    PerformanceReportActivity::class.java
+                ) //성과보고서
             }
             Spacer(modifier = Modifier.weight(0.1f))
         }
