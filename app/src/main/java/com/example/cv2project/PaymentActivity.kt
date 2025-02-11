@@ -131,6 +131,7 @@ fun PaymentScreen() {
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Top
             ) {
+                Spacer(modifier = Modifier.size(15.dp))
                 Text("대상 정보 입력하기 *", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.size(10.dp))
 

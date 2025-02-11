@@ -96,6 +96,7 @@ fun PerformanceReportScreen(studentPrefs: StudentPreferences) {
         }
         Column(
             modifier = Modifier
+                .padding(10.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 20.dp)
