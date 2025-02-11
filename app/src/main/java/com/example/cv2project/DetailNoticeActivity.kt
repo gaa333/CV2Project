@@ -245,8 +245,9 @@ fun DetailNoticeScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("${comment.author}  ${comment.timestamp}")
-                            Text(comment.text)
+                            Text("댓글 : ${comment.text}")
                             Divider()
+                            Spacer(modifier = Modifier.size(3.dp))
                         }
                         Image(
                             painter = painterResource(R.drawable.delete), // 휴지통 아이콘

@@ -90,7 +90,7 @@ fun AddAnnouncementScreen(onSubmit: (String, String, String) -> Unit) {
             onClick = {
                 onSubmit(title, content, currentDate)
             },
-            modifier = Modifier.width(150.dp),
+            modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black
             )

@@ -69,8 +69,7 @@ fun DetailAnnouncementScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
