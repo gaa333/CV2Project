@@ -83,6 +83,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.clip
@@ -273,8 +274,15 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
 
 @Composable
 fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selectedVideoUri: Uri?) {
-
     val coroutineScope = rememberCoroutineScope()
+    var isAnalyzing by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(frames) {
+        if (frames.isNotEmpty()) {
+            isLoading = false // ✅ 프레임이 로드되면 로딩 종료
+        }
+    }
 
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(120, TimeUnit.SECONDS)
@@ -353,10 +361,37 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                 contentAlignment = Alignment.TopCenter
             ) {
                 // canvas
-                if (frames.isNotEmpty()) {
-                    PoseAnimation(frames)
+                if (isAnalyzing) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = androidx.compose.ui.graphics.Color.White,
+                        )
+                        Spacer(modifier = Modifier.size(15.dp))
+                        Text(
+                            "AI 분석 중...",
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(start = 5.dp)
+                        )
+                    }
+                } else if (isLoading) {
+                    CircularProgressIndicator(
+                        color = androidx.compose.ui.graphics.Color.White,
+                        modifier = Modifier.padding(top = 100.dp)
+                    )
                 } else {
-                    Text("동작 분석 영상", fontSize = 15.sp, modifier = Modifier.padding(top = 60.dp))
+                    if (frames.isNotEmpty()) {
+                        PoseAnimation(frames)
+                    } else {
+                        Text(
+                            "동작 분석 영상",
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(top = 100.dp)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(100.dp))
@@ -391,6 +426,7 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                 IconButton(
                     onClick = {
                         onSelectVideo()
+                        isLoading = true
                     },
                     modifier = Modifier
                         .width(60.dp)
@@ -453,6 +489,7 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                             }
                         }
                     } ?: println("No video selected") // `selectedVideoUri`가 null일 경우 로그 출력
+                    isAnalyzing = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -591,6 +628,7 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                                         "Photo saved: ${outputFileResults.savedUri}"
                                                     )
                                                 }
+
                                                 override fun onError(exception: ImageCaptureException) {
                                                     Log.e(
                                                         "CameraScreen",
@@ -643,6 +681,7 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                                                 "Video recording started"
                                                             )
                                                         }
+
                                                         is VideoRecordEvent.Finalize -> {
                                                             if (!recordEvent.hasError()) {
                                                                 Log.d(
