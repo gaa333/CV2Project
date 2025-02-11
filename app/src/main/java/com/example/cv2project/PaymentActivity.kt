@@ -112,7 +112,7 @@ fun PaymentScreen() {
                         .clickable { context?.finish() },
                     tint = Color.White
                 )
-                Text("원비 결제",color = Color.White,fontSize = 25.sp)
+                Text("원비 결제", color = Color.White, fontSize = 25.sp)
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = "공유",
@@ -145,7 +145,12 @@ fun PaymentScreen() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text1.ifEmpty { "청구대상 입력 (최대 20자)" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
+                    Text(
+                        text1.ifEmpty { "청구대상 입력 (최대 20자)" },
+                        color = Color.Gray,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
                 }
                 Text("반드시 본인의 실명을 입력하세요.", color = Color.Gray, fontSize = 10.sp)
 
@@ -160,7 +165,12 @@ fun PaymentScreen() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text2.ifEmpty { "휴대전화번호 입력" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
+                    Text(
+                        text2.ifEmpty { "휴대전화번호 입력" },
+                        color = Color.Gray,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
                 }
                 Text("반드시 본인 휴대전화번호를 입력하세요.", color = Color.Gray, fontSize = 10.sp)
 
@@ -178,7 +188,12 @@ fun PaymentScreen() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text3.ifEmpty { "청구항목 입력 (최대 20자)" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
+                    Text(
+                        text3.ifEmpty { "청구항목 입력 (최대 20자)" },
+                        color = Color.Gray,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
                 }
 
                 // ✅ 청구금액 클릭 시 팝업 활성화
@@ -193,7 +208,12 @@ fun PaymentScreen() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text4.ifEmpty { "청구금액 입력" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
+                    Text(
+                        text4.ifEmpty { "청구금액 입력" },
+                        color = Color.Gray,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Column(
@@ -218,7 +238,8 @@ fun PaymentScreen() {
                             Checkbox(
                                 checked = checked,
                                 onCheckedChange = { checked = it },
-                                modifier = Modifier.size(30.dp)
+                                modifier = Modifier
+                                    .size(30.dp)
                                     .padding(start = 10.dp)
                             )
                             Text(
@@ -247,7 +268,8 @@ fun PaymentScreen() {
                                 "개인정보 수집동의 안내",
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 15.sp,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .weight(1f)
                                     .padding(start = 10.dp)
                             )
                             Icon(

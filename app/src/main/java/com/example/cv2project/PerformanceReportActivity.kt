@@ -19,8 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,34 +64,34 @@ fun PerformanceReportScreen(studentPrefs: StudentPreferences) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray),
-        verticalArrangement = Arrangement.Top,
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(0.1f))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.White),
-            verticalAlignment = Alignment.CenterVertically
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.SpaceBetween
         ) {
-            Text(
-                "성과 보고서",
-                color = Color.Black,
-                fontSize = 30.sp,
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "뒤로가기",
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
+                    .padding(start = 15.dp)
+                    .size(25.dp)
+                    .clickable { context?.finish() },
+                tint = Color.White
             )
-            Image(
-                painter = painterResource(R.drawable.x),
-                contentDescription = null,
+            Text("성과보고서", color = Color.White, fontSize = 25.sp)
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "공유",
                 modifier = Modifier
                     .padding(end = 15.dp)
-                    .size(20.dp)
-                    .clickable { context?.finish() }
+                    .size(25.dp),
+                tint = Color.White
             )
         }
         Column(
@@ -96,15 +100,18 @@ fun PerformanceReportScreen(studentPrefs: StudentPreferences) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 20.dp)
         ) {
+            Spacer(modifier = Modifier.height(20.dp))
             // 학생 리스트..
             students.forEach { student ->
                 StudentCard(student = student) { selectedStudent ->
-                    val intent = Intent(context, DetailPerformanceReportActivity::class.java).apply {
-                        putExtra("name", selectedStudent.name)
-                        putExtra("age", selectedStudent.age)
-                    }
+                    val intent =
+                        Intent(context, DetailPerformanceReportActivity::class.java).apply {
+                            putExtra("name", selectedStudent.name)
+                            putExtra("age", selectedStudent.age)
+                        }
                     context?.startActivity(intent)
                 }
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }

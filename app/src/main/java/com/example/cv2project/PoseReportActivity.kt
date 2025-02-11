@@ -1,9 +1,15 @@
 package com.example.cv2project
 
 import android.app.Activity
+import android.content.ContentValues
+import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -14,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,11 +41,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
+import java.io.OutputStream
 
 class PoseReportActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,107 +125,84 @@ fun PoseReportScreen(
             fontSize = 18.sp,
             color = androidx.compose.ui.graphics.Color.Green
         )
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box( // 이미지 들어갈 곳
+        Spacer(modifier = Modifier.height(40.dp))
+        // 이미지 들어갈 곳
+        Box(
             modifier = Modifier
-                .height(400.dp)
+                .padding(start = 10.dp, end = 10.dp)
+                .height(240.dp)
                 .width(350.dp)
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
-                .background(androidx.compose.ui.graphics.Color.Gray)
+                .background(androidx.compose.ui.graphics.Color.Gray),
         ) {
             imagePath?.let {
                 val bitmap = BitmapFactory.decodeFile(it)
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "Analyzed Image",
-                    modifier = Modifier.size(400.dp)
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
+        Spacer(modifier = Modifier.height(60.dp))
 
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Row {
-            Text("Hip Angle: ${hipAngle.format(1)}")
-            Spacer(modifier = Modifier.width(10.dp))
-            Text("Hip Score: ${hipScore.format(1)}") // 150
-        }
-        Row {
-            Text("Knee Angle: ${kneeAngle.format(1)}")
-            Spacer(modifier = Modifier.width(10.dp))
-            Text("Knee Score: ${kneeScore.format(1)}") // 105
-        }
-        Row {
-            Text("Ankle Angle: ${ankleAngle.format(1)}")
-            Spacer(modifier = Modifier.width(10.dp))
-            Text("Ankle Score: ${ankleScore.format(1)}") // 180
-        }
-        // 유사도, 관절 결과
-        Column(
+        Row(
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .height(150.dp),
+            horizontalArrangement = Arrangement.Center
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Column(
+                modifier = Modifier.fillMaxHeight()
+                    .fillMaxWidth(0.25f)
             ) {
-                Text(
-                    text = "유사도 분석 결과",
-                    fontSize = 18.sp,
-                    color = androidx.compose.ui.graphics.Color.White
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .background(
-                            androidx.compose.ui.graphics.Color.DarkGray,
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-                        ) // 다크그레이 박스
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = "정확도",
-                        fontSize = 18.sp,
-                        color = androidx.compose.ui.graphics.Color.Green
-                    )
-                }
+                Text("", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.size(10.dp))
+                Text("Hip Angle", color = Color.White)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text("Knee Angle", color = Color.White)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text("Ankle Angle", color = Color.White)
             }
-            Spacer(modifier = Modifier.height(15.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Spacer(modifier = Modifier.size(10.dp))
+            Column(
+                modifier = Modifier.fillMaxHeight()
+                    .fillMaxWidth(0.3f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) { Text("적정 각도", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.size(10.dp))
+                Text("150 도", color = Color.White)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text("105 도", color = Color.White)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text("180 도", color = Color.White)
+            }
+            Spacer(modifier = Modifier.size(15.dp))
+            Column(
+                modifier = Modifier.fillMaxHeight()
+                    .fillMaxWidth(0.45f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "관절 각도 수치",
-                    fontSize = 18.sp,
-                    color = androidx.compose.ui.graphics.Color.White
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .background(
-                            androidx.compose.ui.graphics.Color.DarkGray,
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-                        ) // 다크그레이 박스
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = "각도",
-                        fontSize = 18.sp,
-                        color = androidx.compose.ui.graphics.Color.Green
-                    )
-                }
+                Text("측정 각도", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.size(10.dp))
+                Text("${hipAngle.format(1)} 도", color = Color.White)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text("${kneeAngle.format(1)} 도", color = Color.White)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text("${ankleAngle.format(1)} 도", color = Color.White)
             }
         }
+
         Spacer(modifier = Modifier.height(30.dp))
 
         Button(
             onClick = {
-                // 성과 보고서?
+                // 갤러리 저장
+                imagePath?.let {
+                    val bitmap = BitmapFactory.decodeFile(it)
+                    saveImageToGallery(context!!, bitmap) // 갤러리에 저장
+                    Toast.makeText(context, "이미지가 갤러리에 저장되었습니다!", Toast.LENGTH_SHORT).show()
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -237,3 +224,21 @@ fun PoseReportScreen(
 }
 
 fun Double.format(digits: Int) = "%.${digits}f".format(this)
+
+fun saveImageToGallery(context: Context, bitmap: Bitmap, filename: String = "PoseImage") {
+    val contentValues = ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, "$filename.jpg")
+        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/PoseReports")
+    }
+
+    val contentResolver = context.contentResolver
+    val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+    imageUri?.let { uri ->
+        val outputStream: OutputStream? = contentResolver.openOutputStream(uri)
+        outputStream?.use {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) // JPEG 형식으로 저장
+        }
+    }
+}

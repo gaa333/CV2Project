@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 
-class PickupServiceActivity: ComponentActivity() {
+class PickupServiceActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -70,7 +70,8 @@ fun PickupServiceScreen() {
                 tint = Color.White
             )
             Text(
-                "픽업 서비스", fontSize = 25.sp, color = Color.White)
+                "픽업 서비스", fontSize = 25.sp, color = Color.White
+            )
             Icon(
                 imageVector = Icons.Default.Share,
                 contentDescription = "공유",

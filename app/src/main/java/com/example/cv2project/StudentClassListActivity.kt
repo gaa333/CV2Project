@@ -5,12 +5,16 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,7 +34,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
@@ -60,51 +66,65 @@ fun StudentClassListScreen() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .height(60.dp)
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "뒤로가기",
                 modifier = Modifier
+                    .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { context?.finish() }
+                    .clickable { context?.finish() },
+                tint = Color.White
             )
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = "반 목록",
-                fontSize = 24.sp,
-                modifier = Modifier.weight(1f)
-            )
+            Text(text = "반 목록", fontSize = 25.sp,color = Color.White)
 
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "반 추가",
                 modifier = Modifier
+                    .padding(end = 15.dp)
                     .size(30.dp)
-                    .clickable { isAddingClass = true }
+                    .clickable { isAddingClass = true },
+                tint = Color.White
             )
         }
-
-        classList.forEach { className ->
-            Card(
+        Column (
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ){
+            Spacer(modifier = Modifier.height(20.dp))
+            Image(
+                painter = painterResource(id = R.drawable.class3),
+                contentDescription = "1학년반",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
                     .clickable {
                         val intent = Intent(context, StudentManagementActivity::class.java)
-                        intent.putExtra("class_name", className) // 반 이름 전달
+                        intent.putExtra("class_name", "1학년반")
                         context?.startActivity(intent)
                     }
-            ) {
-                Text(
-                    text = className,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
+            )
+            Image(
+                painter = painterResource(id = R.drawable.class4),
+                contentDescription = "2학년반" )
+            Image(
+                painter = painterResource(id = R.drawable.class5),
+                contentDescription = "3학년반")
+            Image(
+                painter = painterResource(id = R.drawable.class6),
+                contentDescription = "4학년반" )
+            Image(
+                painter = painterResource(id = R.drawable.class7),
+                contentDescription = "5학년반")
+            Image(
+                painter = painterResource(id = R.drawable.class8),
+                contentDescription = "6학년반")
         }
+
 
         if (isAddingClass) {
             AlertDialog(

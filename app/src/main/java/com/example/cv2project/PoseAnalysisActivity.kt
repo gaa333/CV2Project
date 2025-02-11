@@ -161,19 +161,16 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
                         timestampMs,
                         lastTimestampMs + inferenceIntervalMs * 1000L
                     )
-
                     val frame = retriever.getFrameAtTime(
                         validTimestampMs,
                         MediaMetadataRetriever.OPTION_CLOSEST
                     )
-
                     if (frame == null) {
                         Log.e("PoseAnalysis", "❌ Frame at timestamp $validTimestampMs is null")
                         continue
                     } else {
                         Log.d("PoseAnalysis", "✅ Successfully retrieved frame at $validTimestampMs")
                     }
-
                     val argb8888Frame = frame.copy(Bitmap.Config.ARGB_8888, true)
 
                     // ✅ Pose 추정 후 새로운 이미지 저장
@@ -181,20 +178,16 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
                     result?.results?.firstOrNull()?.let { poseResult ->
                         val processedBitmap = drawPoseOnImage(argb8888Frame, poseResult)
                         frameList.add(processedBitmap)
-
                         // ✅ 저장된 프레임 로그 출력
                         val savedPath = saveBitmap(processedBitmap, "frame_$i.png")
                         Log.d("PoseAnalysis", "✅ Frame $i saved at: $savedPath")
                     }
-
                     lastTimestampMs = validTimestampMs
                 }
-
                 runOnUiThread {
                     viewModel.setFrames(frameList)
                     Log.d("PoseAnalysisViewModel", "✅ Frames sent to ViewModel: ${frameList.size}")
                 }
-
             } catch (e: Exception) {
                 Log.e("PoseAnalysis", "❌ Video processing failed: ${e.message}", e)
             } finally {
@@ -219,7 +212,6 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
         }
         return file.absolutePath
     }
-
 
     private fun drawPoseOnImage(bitmap: Bitmap, result: PoseLandmarkerResult): Bitmap {
         val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -246,7 +238,6 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
             Pair(27, 29), Pair(29, 31),
             Pair(28, 30), Pair(30, 32)
         )
-
         result.landmarks().forEach { landmark ->
             landmark.forEach { point ->
                 canvas.drawPoint(
@@ -255,7 +246,6 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
                     paint
                 )
             }
-
             for ((startIdx, endIdx) in connections) {
                 val start = landmark[startIdx]
                 val end = landmark[endIdx]
@@ -269,7 +259,6 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
         return mutableBitmap
     }
 
-    //
     override fun onError(error: String, errorCode: Int) {
         Log.e("PoseAnalysis", "Error: $error (Code: $errorCode)")
         runOnUiThread {
@@ -280,14 +269,11 @@ class PoseAnalysisActivity : ComponentActivity(), PoseLandmarkerHelper.Landmarke
     override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
         Log.d("PoseAnalysis", "Pose detected: ${resultBundle.results.size}")
     }
-
 }
-
 
 @Composable
 fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selectedVideoUri: Uri?) {
 
-//    var selectedVideoUri by remember { mutableStateOf<Uri?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     val okHttpClient = OkHttpClient.Builder()
@@ -303,7 +289,6 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
         .build()
 
     val service = retrofit.create(FlaskService::class.java)
-
 
     val context = LocalContext.current as? Activity
     var currentFrameIndex by remember { mutableStateOf(0) }
@@ -344,36 +329,37 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                     tint = androidx.compose.ui.graphics.Color.White
                 )
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Text(
                 "실시간 동작 분석",
                 fontSize = 25.sp,
                 color = androidx.compose.ui.graphics.Color.White
             )
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
                 "학생 영상을 넣어보세요",
                 fontSize = 18.sp,
                 color = androidx.compose.ui.graphics.Color.Green
             )
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(80.dp))
 
             Box( // 영상 들어갈 곳
                 modifier = Modifier
-                    .height(400.dp)
+                    .padding(start = 10.dp, end = 10.dp)
+                    .height(240.dp)
                     .width(350.dp)
                     .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                     .background(androidx.compose.ui.graphics.Color.Gray),
                 contentAlignment = Alignment.TopCenter
             ) {
-
                 // canvas
                 if (frames.isNotEmpty()) {
                     PoseAnimation(frames)
                 } else {
-                    Text("no frames")
+                    Text("동작 분석 영상", fontSize = 15.sp, modifier = Modifier.padding(top = 60.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(100.dp))
 
             // 카메라, 갤러리 버튼
             Row(
@@ -388,8 +374,8 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                         showCamera = true
                     },
                     modifier = Modifier
-                        .width(50.dp)
-                        .height(50.dp)
+                        .width(60.dp)
+                        .height(60.dp)
                         .background(
                             androidx.compose.ui.graphics.Color.DarkGray,
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
@@ -397,17 +383,18 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.camera),
-                        contentDescription = "Camera Icon"
+                        contentDescription = "Camera Icon",
+                        modifier = Modifier.size(50.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(60.dp))
                 IconButton(
                     onClick = {
                         onSelectVideo()
                     },
                     modifier = Modifier
-                        .width(50.dp)
-                        .height(50.dp)
+                        .width(60.dp)
+                        .height(60.dp)
                         .background(
                             androidx.compose.ui.graphics.Color.DarkGray,
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
@@ -415,7 +402,8 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.gallery),
-                        contentDescription = "Gallery Icon"
+                        contentDescription = "Gallery Icon",
+                        modifier = Modifier.size(50.dp)
                     )
                 }
             }
@@ -436,18 +424,15 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                             }
                                     }
                                 }
-
                                 val requestFile = file.asRequestBody("video/*".toMediaTypeOrNull())
                                 val body = MultipartBody.Part.createFormData(
                                     "video",
                                     file.name,
                                     requestFile
                                 )
-
                                 val serverResponse = withContext(Dispatchers.IO) {
                                     service.uploadVideo(body)
                                 }
-
                                 serverResponse.results.firstOrNull()?.let { result ->
                                     val imageFile =
                                         context?.let { saveImageToFile(it, result.image_data) }
@@ -499,26 +484,19 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                         .build()
                 )
             }
-
             val imageCapture = remember {
                 ImageCapture.Builder().build()
             }
-
             LaunchedEffect(Unit) {
                 previewView.scaleType = PreviewView.ScaleType.FIT_END // 또는 FILL_START
             }
-
             LaunchedEffect(Unit) {
                 val cameraProvider = ProcessCameraProvider.getInstance(context).get()
-
                 val preview = Preview.Builder()
-//                    .setTargetAspectRatio(getAspectRatio(previewView.width, previewView.height))
                     .build().apply {
                         setSurfaceProvider(previewView.surfaceProvider)
                     }
-
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
                 try {
                     cameraProvider.unbindAll()
                     cameraProvider.bindToLifecycle(
@@ -532,11 +510,10 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                     Log.e("CameraScreen", "카메라 바인딩 실패", e)
                 }
             }
-
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // 🔼 위쪽 white 바 (뒤로 가기 버튼 포함)
+                // 위쪽 white 바 (뒤로 가기 버튼 포함)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -556,7 +533,6 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                             }
                     )
                 }
-
                 // 📷 카메라 미리보기
                 AndroidView(
                     factory = { previewView },
@@ -564,8 +540,7 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                         .fillMaxWidth()
                         .weight(0.75f)
                 )
-
-                // 🔽 아래쪽 white 바 (사진 촬영 및 비디오 녹화 버튼 포함)
+                // 아래쪽 white 바 (사진 촬영 및 비디오 녹화 버튼 포함)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -601,13 +576,11 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                                 )
                                             }
                                         }
-
                                         val outputOptions = ImageCapture.OutputFileOptions.Builder(
                                             context.contentResolver,
                                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                                             imageContentValues
                                         ).build()
-
                                         capture.takePicture(
                                             outputOptions,
                                             ContextCompat.getMainExecutor(context),
@@ -618,7 +591,6 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                                         "Photo saved: ${outputFileResults.savedUri}"
                                                     )
                                                 }
-
                                                 override fun onError(exception: ImageCaptureException) {
                                                     Log.e(
                                                         "CameraScreen",
@@ -631,7 +603,6 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                     }
                                 }
                         )
-
                         // 🎥 비디오 녹화 버튼
                         Image(
                             painter = painterResource(id = if (isRecording) R.drawable.blackrect else R.drawable.red),
@@ -654,13 +625,11 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                                     )
                                                 }
                                             }
-
                                             val mediaStoreOutputOptions =
                                                 MediaStoreOutputOptions.Builder(
                                                     context.contentResolver,
                                                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI
                                                 ).setContentValues(videoContentValues).build()
-
                                             recording = videoCap.output.prepareRecording(
                                                 context,
                                                 mediaStoreOutputOptions
@@ -674,7 +643,6 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
                                                                 "Video recording started"
                                                             )
                                                         }
-
                                                         is VideoRecordEvent.Finalize -> {
                                                             if (!recordEvent.hasError()) {
                                                                 Log.d(
@@ -707,11 +675,9 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
     }
 }
 
-
 @Composable
 fun PoseAnimation(frames: List<Bitmap>) {
     var currentFrameIndex by remember { mutableStateOf(0) }
-
     // 일정한 간격으로 프레임을 업데이트
     LaunchedEffect(frames) {
         while (true) {
@@ -719,7 +685,6 @@ fun PoseAnimation(frames: List<Bitmap>) {
             currentFrameIndex = (currentFrameIndex + 1) % frames.size
         }
     }
-
     Canvas(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -741,7 +706,6 @@ fun RequestCameraPermission() {
             }
         }
     )
-
     LaunchedEffect(Unit) {
         launcher.launch(android.Manifest.permission.CAMERA)
     }
