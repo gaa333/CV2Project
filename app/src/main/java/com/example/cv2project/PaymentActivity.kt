@@ -25,6 +25,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -76,13 +80,13 @@ fun PaymentScreen() {
     var text3 by remember { mutableStateOf("") }
     var text4 by remember { mutableStateOf("") }
 
-    val isAllFieldsFilled = text1.isNotEmpty() && text2.isNotEmpty() && text3.isNotEmpty() && text4.isNotEmpty()
+    val isAllFieldsFilled =
+        text1.isNotEmpty() && text2.isNotEmpty() && text3.isNotEmpty() && text4.isNotEmpty()
     val isButtonEnabled = isAllFieldsFilled && checked
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(10.dp),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -91,40 +95,33 @@ fun PaymentScreen() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.weight(0.1f))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .background(color = Color.White),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(color = Color.Black),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    "원비 결제",
-                    color = Color.Black,
-                    fontSize = 30.sp,
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "뒤로가기",
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp)
+                        .padding(start = 15.dp)
+                        .size(25.dp)
+                        .clickable { context?.finish() },
+                    tint = Color.White
                 )
-                Image(
-                    painter = painterResource(R.drawable.pen),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(end = 20.dp)
-                        .size(30.dp)
-                        .clickable {}
-                )
-                Image(
-                    painter = painterResource(R.drawable.x),
-                    contentDescription = null,
+                Text("원비 결제",color = Color.White,fontSize = 25.sp)
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "공유",
                     modifier = Modifier
                         .padding(end = 15.dp)
-                        .size(20.dp)
-                        .clickable { context?.finish() }
+                        .size(25.dp),
+                    tint = Color.White
                 )
             }
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -135,77 +132,76 @@ fun PaymentScreen() {
                 verticalArrangement = Arrangement.Top
             ) {
                 Text("대상 정보 입력하기 *", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.size(10.dp))
 
                 // ✅ 청구대상 클릭 시 팝업 활성화
-                Text("청구대상", fontSize = 10.sp)
+                Text("청구대상", fontSize = 15.sp)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp)
-                        .border(width = 1.dp, color = Color.Gray)
+                        .height(40.dp)
+                        .border(width = 1.dp, color = Color.Gray, RoundedCornerShape(10.dp))
                         .clickable { showTextField1 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text1.ifEmpty { "청구대상 입력 (최대 20자)" }, color = Color.Gray, fontSize = 15.sp)
+                    Text(text1.ifEmpty { "청구대상 입력 (최대 20자)" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
                 }
-                Text("반드시 본인의 실명을 입력하세요.", color = Color.Gray)
+                Text("반드시 본인의 실명을 입력하세요.", color = Color.Gray, fontSize = 10.sp)
 
                 Spacer(modifier = Modifier.size(10.dp))
-                Text("휴대전화번호", fontSize = 10.sp)
+                Text("휴대전화번호", fontSize = 15.sp)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp)
-                        .border(width = 1.dp, color = Color.Gray)
+                        .height(40.dp)
+                        .border(width = 1.dp, color = Color.Gray, RoundedCornerShape(10.dp))
                         .clickable { showTextField2 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text2.ifEmpty { "휴대전화번호 입력" }, color = Color.Gray, fontSize = 15.sp)
+                    Text(text2.ifEmpty { "휴대전화번호 입력" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
                 }
-                Text("반드시 본인 휴대전화번호를 입력하세요.", color = Color.Gray)
+                Text("반드시 본인 휴대전화번호를 입력하세요.", color = Color.Gray, fontSize = 10.sp)
 
                 // ✅ 청구항목 클릭 시 팝업 활성화
-                Spacer(modifier = Modifier.size(15.dp))
+                Spacer(modifier = Modifier.size(20.dp))
                 Text("청구 정보 입력하기 *", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.size(10.dp))
                 Text("청구항목", fontSize = 15.sp)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp)
-                        .border(width = 1.dp, color = Color.Gray)
+                        .height(40.dp)
+                        .border(width = 1.dp, color = Color.Gray, RoundedCornerShape(10.dp))
                         .clickable { showTextField3 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text3.ifEmpty { "청구항목 입력 (최대 20자)" }, color = Color.Gray, fontSize = 15.sp)
+                    Text(text3.ifEmpty { "청구항목 입력 (최대 20자)" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
                 }
 
                 // ✅ 청구금액 클릭 시 팝업 활성화
                 Spacer(modifier = Modifier.size(10.dp))
-                Text("청구금액 (원)", fontSize = 10.sp)
+                Text("청구금액 (원)", fontSize = 15.sp)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp)
-                        .border(width = 1.dp, color = Color.Gray)
+                        .height(40.dp)
+                        .border(width = 1.dp, color = Color.Gray, RoundedCornerShape(10.dp))
                         .clickable { showTextField4 = true },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text4.ifEmpty { "청구금액 입력" }, color = Color.Gray, fontSize = 17.sp)
+                    Text(text4.ifEmpty { "청구금액 입력" }, color = Color.Gray, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
                 }
+                Spacer(modifier = Modifier.height(20.dp))
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp)
-                        .padding(10.dp)
-                        .background(color = Color.LightGray),
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(color = Color(0xffE2E2E2)),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -223,11 +219,13 @@ fun PaymentScreen() {
                                 checked = checked,
                                 onCheckedChange = { checked = it },
                                 modifier = Modifier.size(30.dp)
+                                    .padding(start = 10.dp)
                             )
                             Text(
                                 "개인정보 수집이용 및 마케팅 정보 수신동의 (필수)",
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp
+                                fontSize = 15.sp,
+                                modifier = Modifier.padding(start = 10.dp)
                             )
                         }
                     }
@@ -248,11 +246,12 @@ fun PaymentScreen() {
                             Text(
                                 "개인정보 수집동의 안내",
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 10.sp,
+                                fontSize = 15.sp,
                                 modifier = Modifier.weight(1f)
+                                    .padding(start = 10.dp)
                             )
                             Icon(
-                                painter = painterResource(R.drawable.red),
+                                imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .padding(end = 5.dp)
@@ -265,23 +264,27 @@ fun PaymentScreen() {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp)
-                        .background(color = Color.LightGray),
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(color = Color(0xffE2E2E2)),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("청구서 발송 시, 문자로 전송됩니다.", fontSize = 10.sp, color = Color.Gray)
+                    Text("청구서 발송 시, 문자로 전송됩니다.", fontSize = 12.sp, color = Color.Gray)
                 }
+                Spacer(modifier = Modifier.height(15.dp))
                 Button(
+                    shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp),
+                        .height(40.dp),
                     onClick = {
                         Toast.makeText(context, "발송 완료~", Toast.LENGTH_SHORT).show()
                     },
-                    enabled = isButtonEnabled
+                    enabled = isButtonEnabled,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black // Set the button background color to black
+                    )
                 ) {
                     Text("청구서 발송하기", fontSize = 18.sp, color = Color.White)
                 }
@@ -361,8 +364,8 @@ fun InputPopup(
                     border = BorderStroke(0.01.dp, Color.Black),
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD2F0FF),
-                        contentColor = Color.Black
+                        containerColor = Color.Black,
+                        contentColor = Color.White
                     ),
                     modifier = Modifier
                         .width(100.dp)
@@ -375,8 +378,8 @@ fun InputPopup(
                     border = BorderStroke(0.01.dp, Color.Black),
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD2F0FF),
-                        contentColor = Color.Black
+                        containerColor = Color.Black,
+                        contentColor = Color.White
                     ),
                     modifier = Modifier
                         .width(100.dp)
@@ -384,7 +387,7 @@ fun InputPopup(
                     onClick = {
                         onConfirm(tempText)
                     }) {
-                    Text("업로드")
+                    Text("확인")
                 }
             }
         }
