@@ -25,9 +25,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -107,35 +113,43 @@ fun DetailNoticeScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-//        Spacer(modifier = Modifier.weight(0.1f))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.White),
-            verticalAlignment = Alignment.CenterVertically
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.SpaceBetween
         ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "뒤로가기",
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .size(25.dp)
+                    .clickable { context?.finish() },
+                tint = Color.White
+            )
             Text(
                 "알림장 내용",
-                color = Color.Black,
-                fontSize = 30.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
+                color = Color.White,
+                fontSize = 25.sp
             )
-            Image(
-                painter = painterResource(R.drawable.delete),
-                contentDescription = null,
+
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete notice",
                 modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(30.dp)
-                    .clickable { showDialog = true }
+                    .padding(end = 15.dp)
+                    .size(25.dp)
+                    .clickable { showDialog = true },
+                tint = Color.White
             )
+
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
@@ -169,14 +183,6 @@ fun DetailNoticeScreen(
                     }
                 )
             }
-            Image(
-                painter = painterResource(R.drawable.x),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(20.dp)
-                    .clickable { context?.finish() }
-            )
         }
         Column(
             modifier = Modifier
@@ -187,43 +193,45 @@ fun DetailNoticeScreen(
         ) {
             // 알림장 세부 내용
             Spacer(modifier = Modifier.size(10.dp))
-            // 학생명
-            Text(
-                text = "$studentName 학생",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 작성 날짜
-            Text(
-                text = "작성 날짜: $date",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 공지사항 제목
+            // notice 제목
             Text(
                 text = title,
-                fontSize = 24.sp,
+                fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
-
             Spacer(modifier = Modifier.height(20.dp))
-
             // 공지사항 내용
             Text(text = content, fontSize = 18.sp)
+            Spacer(modifier = Modifier.height(50.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // 학생명
+                Text(
+                    text = "$studentName 학생",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.weight(1f)
+                )
+                // 작성 날짜
+                Text(
+                    text = "작성 날짜: $date",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Divider(Modifier.width(1.dp))
         }
         Column(
             modifier = Modifier
+                .padding(20.dp)
                 .fillMaxWidth()
                 .height(300.dp)
         ) {
             // 댓글 표시
             Text("💬 댓글 ${comments.value.size}")
+            Spacer(modifier = Modifier.height(15.dp))
             if (comments.value.isEmpty()) {
                 Text("등록된 댓글이 없습니다.")
             } else {
@@ -262,9 +270,13 @@ fun DetailNoticeScreen(
         Button(
             onClick = {
                 showCommentDialog.value = true
-            }
+            },
+            modifier = Modifier.padding(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black
+            )
         ) {
-            Text("댓글 작성")
+            Text("댓글 작성", color = Color.White)
         }
     }
     // 댓글 입력 팝업 다이얼로그
@@ -291,7 +303,10 @@ fun DetailNoticeScreen(
                             val newCommentData = Comment(
                                 author = "사용자", // 실제 사용자 이름으로 변경 가능
                                 text = newComment.value,
-                                timestamp = SimpleDateFormat("MM월 dd일 HH:mm", Locale.getDefault()).format(Date())
+                                timestamp = SimpleDateFormat(
+                                    "MM월 dd일 HH:mm",
+                                    Locale.getDefault()
+                                ).format(Date())
                             )
                             val updatedComments = comments.value + newCommentData
                             comments.value = updatedComments

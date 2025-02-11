@@ -119,7 +119,7 @@ fun MainScreen() {
                 painter = painterResource(id = R.drawable.hi),
                 contentDescription = "코치 하이",
                 modifier = Modifier
-                    .height(150.dp)
+                    .height(130.dp)
                     .align(Alignment.Start)
                     .padding(start = 10.dp, top = 10.dp)
             )
@@ -178,6 +178,6 @@ fun MenuButton(imageResId: Int, context: Context, activity: Class<*>) {
                 )
             }
             .scale(scale)
-            .size(100.dp) // 이미지 크기 조정
+            .size(90.dp) // 이미지 크기 조정
     )
 }

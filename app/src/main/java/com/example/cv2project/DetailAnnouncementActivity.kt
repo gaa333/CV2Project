@@ -19,9 +19,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -70,29 +74,37 @@ fun DetailAnnouncementScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(0.1f))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(color = Color.White),
-            verticalAlignment = Alignment.CenterVertically
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.SpaceBetween
         ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "뒤로가기",
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .size(25.dp)
+                    .clickable { context?.finish() },
+                tint = Color.White
+            )
+
             Text(
                 "공지사항 내용",
-                color = Color.Black,
-                fontSize = 30.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
+                color = Color.White,
+                fontSize = 25.sp,
             )
-            Image(
-                painter = painterResource(R.drawable.delete),
-                contentDescription = null,
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete notice",
                 modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(30.dp)
-                    .clickable { showDialog = true }
+                    .padding(end = 15.dp)
+                    .size(25.dp)
+                    .clickable { showDialog = true },
+                tint = Color.White
             )
             if (showDialog) {
                 AlertDialog(
@@ -116,21 +128,13 @@ fun DetailAnnouncementScreen(
                     },
                     dismissButton = {
                         Button(
-                            onClick = {showDialog = false }
+                            onClick = { showDialog = false }
                         ) {
                             Text("취소")
                         }
                     }
                 )
             }
-            Image(
-                painter = painterResource(R.drawable.x),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(20.dp)
-                    .clickable { context?.finish() }
-            )
         }
         Column(
             modifier = Modifier
@@ -139,26 +143,23 @@ fun DetailAnnouncementScreen(
                 .padding(20.dp)
         ) {
             Spacer(modifier = Modifier.size(10.dp))
+            // 공지사항 제목
+            Text(
+                text = title,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.size(20.dp))
+            // 공지사항 내용
+            Text(text = content, fontSize = 18.sp)
+            Spacer(modifier = Modifier.size(50.dp))
             // 작성 날짜
             Text(
                 text = "작성 날짜: $date",
                 fontSize = 14.sp,
                 color = Color.Gray
             )
-
             Spacer(modifier = Modifier.height(20.dp))
-
-            // 공지사항 제목
-            Text(
-                text = title,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 공지사항 내용
-            Text(text = content, fontSize = 18.sp)
         }
     }
 }
