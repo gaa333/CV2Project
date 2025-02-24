@@ -714,45 +714,45 @@ fun PoseAnalysisScreen(onSelectVideo: () -> Unit, frames: List<Bitmap>, selected
     }
 }
 
-@Composable
-fun PoseAnimation(frames: List<Bitmap>) {
-    var currentFrameIndex by remember { mutableStateOf(0) }
-    // 일정한 간격으로 프레임을 업데이트
-    LaunchedEffect(frames) {
-        while (true) {
-            delay(100L) // 100ms마다 프레임 변경 (FPS 10)
-            currentFrameIndex = (currentFrameIndex + 1) % frames.size
-        }
-    }
-    Canvas(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        if (frames.isNotEmpty()) {
-            val frame = frames[currentFrameIndex]
-            drawImage(frame.asImageBitmap())
-        }
-    }
-}
-
-@Composable
-fun RequestCameraPermission() {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            if (!granted) {
-                Toast.makeText(context, "카메라 권한이 필요합니다.", Toast.LENGTH_LONG).show()
-            }
-        }
-    )
-    LaunchedEffect(Unit) {
-        launcher.launch(android.Manifest.permission.CAMERA)
-    }
-}
-
-fun saveImageToFile(context: android.content.Context, base64Image: String): File {
-    val imageBytes = Base64.decode(base64Image, Base64.DEFAULT)
-    val file = File(context.cacheDir, "temp_image.jpg")
-    file.writeBytes(imageBytes)
-    return file
-}
+//@Composable
+//fun PoseAnimation(frames: List<Bitmap>) {
+//    var currentFrameIndex by remember { mutableStateOf(0) }
+//    // 일정한 간격으로 프레임을 업데이트
+//    LaunchedEffect(frames) {
+//        while (true) {
+//            delay(100L) // 100ms마다 프레임 변경 (FPS 10)
+//            currentFrameIndex = (currentFrameIndex + 1) % frames.size
+//        }
+//    }
+//    Canvas(
+//        modifier = Modifier.fillMaxWidth()
+//    ) {
+//        if (frames.isNotEmpty()) {
+//            val frame = frames[currentFrameIndex]
+//            drawImage(frame.asImageBitmap())
+//        }
+//    }
+//}
+//
+//@Composable
+//fun RequestCameraPermission() {
+//    val context = LocalContext.current
+//    val launcher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.RequestPermission(),
+//        onResult = { granted ->
+//            if (!granted) {
+//                Toast.makeText(context, "카메라 권한이 필요합니다.", Toast.LENGTH_LONG).show()
+//            }
+//        }
+//    )
+//    LaunchedEffect(Unit) {
+//        launcher.launch(android.Manifest.permission.CAMERA)
+//    }
+//}
+//
+//fun saveImageToFile(context: android.content.Context, base64Image: String): File {
+//    val imageBytes = Base64.decode(base64Image, Base64.DEFAULT)
+//    val file = File(context.cacheDir, "temp_image.jpg")
+//    file.writeBytes(imageBytes)
+//    return file
+//}
