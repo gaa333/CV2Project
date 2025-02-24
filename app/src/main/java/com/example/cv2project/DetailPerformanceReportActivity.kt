@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -101,27 +102,171 @@ fun DetailPerformanceReportScreen(name: String, age: Int) {
                 .verticalScroll(rememberScrollState())
         ) {
             Box(
-                modifier = Modifier.fillMaxWidth()
-                    .height(600.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
             ) {
-                Text("2025년 02월 1일", fontSize = 17.sp, modifier = Modifier.padding(top = 50.dp))
+                Text("2025년 02월 1일", fontSize = 17.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 50.dp))
                 Image(
                     painter = painterResource(R.drawable.poseresult0),
                     contentDescription = null,
                     Modifier.size(350.dp)
                 )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .align(Alignment.BottomCenter),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.28f)
+                    ) {
+                        Text("", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text("Hip Angle", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("Knee Angle", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("Ankle Angle", )
+                    }
+//                    Spacer(modifier = Modifier.size(10.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.3f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "적정 각도",
 
-                Text("2025년 02월 11일", fontSize = 17.sp, modifier = Modifier.padding(bottom = 280.dp).align(Alignment.BottomStart))
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text("150 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("105 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("180 도", )
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.45f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "측정 각도",
+
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text("163.9 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("105.9 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("106.1 도", )
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+
+            ) {
+                Text(
+                    "2025년 02월 11일",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(top = 45.dp)
+                )
                 Image(
                     painter = painterResource(R.drawable.poseresult),
                     contentDescription = null,
-                    Modifier.size(350.dp)
-                        .align(Alignment.BottomCenter)
+                    Modifier
+                        .size(350.dp)
                 )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .align(Alignment.BottomCenter),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.28f)
+                    ) {
+                        Text("", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text("Hip Angle", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("Knee Angle", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("Ankle Angle", )
+                    }
+//                    Spacer(modifier = Modifier.size(10.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.3f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "적정 각도",
+
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text("150 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("105 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("180 도", )
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.45f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "측정 각도",
+
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text("126.2 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("88.8 도", )
+                        Spacer(modifier = Modifier.size(5.dp))
+                        Text("142.6 도", )
+                    }
+                }
+
             }
-            Text("보고서", fontSize = 25.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 5.dp))
+            Spacer(modifier = Modifier.height(30.dp))
+            Text(
+                "보고서",
+                fontSize = 25.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = 5.dp)
+            )
             Spacer(modifier = Modifier.height(20.dp))
-            Text("2월 1일에 비해 슈팅 자세 개선되었음~!", modifier = Modifier.padding(start = 10.dp))
+            Text("2월 1일 당시 슈팅 자세에 비해 자세가 많이 개선되었습니다. ", modifier = Modifier.padding(start = 10.dp))
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
