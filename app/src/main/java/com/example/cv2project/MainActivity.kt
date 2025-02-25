@@ -115,6 +115,10 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import androidx.compose.foundation.Canvas
 import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.cv2project.preferences.CommentPreferences
+import com.example.cv2project.preferences.NoticePreferences
 import com.example.cv2project.preferences.StudentPreferences
 
 
@@ -135,6 +139,8 @@ fun MyApp() {
     val navController = rememberNavController()
     val context = LocalContext.current
     val studentPrefs = remember { StudentPreferences(context) }
+    val noticePrefs = remember { NoticePreferences(context) }
+    val commentPrefs = remember { CommentPreferences(context) }
 
 
     NavHost(navController = navController, startDestination = "main") {
@@ -147,7 +153,35 @@ fun MyApp() {
         composable("payment") { PaymentScreen(navController) }
         composable("studentClassList") { StudentClassListScreen(navController) }
         composable("performanceReport") { PerformanceReportScreen(navController, studentPrefs) }
+        composable("addNotice") { AddNoticeScreen(navController, studentPrefs, noticePrefs) }
+        composable(
+            route = "detailNotice?title={title}&content={content}&studentName={studentName}&date={date}&noticeId={noticeId}",
+            arguments = listOf(
+                navArgument("title") { type = NavType.StringType; defaultValue = "제목 없음" },
+                navArgument("content") { type = NavType.StringType; defaultValue = "내용 없음" },
+                navArgument("studentName") { type = NavType.StringType; defaultValue = "이름 없음" },
+                navArgument("date") { type = NavType.StringType; defaultValue = "날짜 없음" },
+                navArgument("noticeId") { type = NavType.StringType; defaultValue = "noticeId" }
+            )
+        ) { backStackEntry ->
+            // 인자(Arguments) 추출
+            val title = backStackEntry.arguments?.getString("title") ?: "제목 없음"
+            val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
+            val studentName = backStackEntry.arguments?.getString("studentName") ?: "이름 없음"
+            val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
+            val noticeId = backStackEntry.arguments?.getString("noticeId") ?: "noticeId" // ✅ noticeId 추출
 
+            DetailNoticeScreen(
+                navController,
+                title = title,
+                content = content,
+                studentName = studentName,
+                date = date,
+                noticeId = noticeId,
+                commentPrefs = commentPrefs,
+                noticePrefs
+            )
+        }
     }
 }
 
