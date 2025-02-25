@@ -15,8 +15,9 @@ import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.camera.core.ImageProxy
-import com.google.android.gms.common.util.VisibleForTesting
+//import com.google.android.gms.common.util.VisibleForTesting
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.MPImage
 import com.google.mediapipe.tasks.core.BaseOptions

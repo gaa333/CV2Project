@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "187305168674",
+    "project_id": "cv2project-118b3",
+    "storage_bucket": "cv2project-118b3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187305168674:android:47bb988329a432bab21f7b",
+        "android_client_info": {
+          "package_name": "com.example.cv2project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAY-qeirJL8W-cTtN6NL_q51QBqLCRYAZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
