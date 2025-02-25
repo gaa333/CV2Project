@@ -200,6 +200,32 @@ fun MyApp() {
 
             DetailAnnouncementScreen(navController, title, content, date, announcementPrefs)
         }
+        composable(
+            "studentManagement?className={className}",
+            arguments = listOf(
+                navArgument("className") { type = NavType.StringType; defaultValue = "반 이름 없음" }
+            )
+        ) { backStackEntry ->
+            val className = backStackEntry.arguments?.getString("className") ?: "반 이름 없음"
+            StudentManagementScreen(navController, studentPrefs, className)
+        }
+
+        composable(
+            "studentDetail?studentName={studentName}&studentAge={studentAge}",
+            arguments = listOf(
+                navArgument("studentName") { type = NavType.StringType; defaultValue = "이름 없음" },
+                navArgument("studentAge") { type = NavType.IntType; defaultValue = 0 }
+            )
+        ) { backStackEntry ->
+            val studentName = backStackEntry.arguments?.getString("studentName") ?: "이름 없음"
+            val studentAge = backStackEntry.arguments?.getInt("studentAge") ?: 0
+
+            StudentDetailScreen(navController, studentName, studentAge)
+        }
+
+
+
+
     }
 }
 

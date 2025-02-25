@@ -5,9 +5,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -15,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
+import com.example.cv2project.preferences.Student
+import com.example.cv2project.preferences.StudentPreferences
 
 /**
  * 반 목록 화면 Composable
@@ -81,11 +87,7 @@ fun StudentClassListScreen(navController: NavController) {
                 contentDescription = "1학년반",
                 modifier = Modifier
                     .clickable {
-                        // navController.navigate("studentManagement") // 만약 StudentManagementScreen이 있다면
-                        // 또는 기존 Activity로 이동하는 경우:
-                        // val context = LocalContext.current
-                        // val intent = Intent(context, StudentManagementActivity::class.java)
-                        // context.startActivity(intent)
+                         navController.navigate("studentManagement?className=1학년반") // 만약 StudentManagementScreen이 있다면
                     }
             )
             Image(
@@ -147,6 +149,211 @@ fun StudentClassListScreen(navController: NavController) {
                     }
                 }
             )
+        }
+    }
+}
+
+@Composable
+fun StudentManagementScreen(navController: NavController, studentPrefs: StudentPreferences, selectedClassName: String) {
+    var students by remember { mutableStateOf(studentPrefs.loadStudents(selectedClassName)) }
+    var isAddingStudent by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "뒤로가기",
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .size(25.dp)
+                    .clickable { navController.popBackStack() }, // ✅ 뒤로가기 처리
+                tint = Color.White
+            )
+            Text(
+                text = "학생 프로필",
+                color = Color.White,
+                fontSize = 25.sp,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "학생 추가",
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(25.dp)
+                    .clickable { isAddingStudent = true }, // 학생 추가 다이얼로그 활성화
+                tint = Color.White
+            )
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.profile2),
+                contentDescription = "검색",
+                modifier = Modifier.padding(start = 5.dp, end = 5.dp)
+            )
+            Spacer(modifier = Modifier.height(15.dp))
+
+            // ✅ 네비게이션을 사용하여 학생 상세 정보 화면으로 이동
+            Image(
+                painter = painterResource(id = R.drawable.profile3),
+                contentDescription = "음바페",
+                modifier = Modifier
+                    .clickable {
+                        navController.navigate("studentDetail?studentName=음바페")
+                    }
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile4),
+                contentDescription = "손흥민"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile5),
+                contentDescription = "호날두"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile6),
+                contentDescription = "메시"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile7),
+                contentDescription = "네이마르"
+            )
+        }
+    }
+
+    // ✅ 학생 추가 다이얼로그
+    if (isAddingStudent) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("이름") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = age,
+                    onValueChange = { age = it },
+                    label = { Text("나이") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(
+                        onClick = {
+                            name = ""
+                            age = ""
+                            isAddingStudent = false
+                        }
+                    ) {
+                        Text("취소")
+                    }
+
+                    Button(
+                        onClick = {
+                            if (name.isNotEmpty() && age.isNotEmpty()) {
+                                val updatedStudents = students.toMutableList()
+                                updatedStudents.add(Student(name, age.toInt()))
+                                studentPrefs.saveStudents(selectedClassName, updatedStudents)
+                                students = updatedStudents
+                                name = ""
+                                age = ""
+                                isAddingStudent = false
+                            }
+                        }
+                    ) {
+                        Text("저장")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StudentDetailScreen(navController: NavController, studentName: String, studentAge: Int) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.LightGray),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.detail1),
+            contentDescription = "$studentName 프로필",
+            Modifier.fillMaxWidth()
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 5.dp, end = 5.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+            Image(
+                painter = painterResource(id = R.drawable.detail2),
+                contentDescription = "출석"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.detail3),
+                contentDescription = "특이사항"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.detail4),
+                contentDescription = "원비 결제"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.detail5),
+                contentDescription = "연락처"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.detail6),
+                contentDescription = "주소"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.detail7),
+                contentDescription = "성과리포트"
+            )
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
