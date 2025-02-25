@@ -30,23 +30,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AnnouncementActivity" />
-        <activity android:name=".AttendanceActivity" />
-        <activity android:name=".NoticeActivity" />
-        <activity android:name=".PaymentActivity" />
-        <activity android:name=".PerformanceReportActivity" />
-        <activity android:name=".PickupServiceActivity" />
-        <activity android:name=".PoseAnalysisActivity" />
-        <activity android:name=".ScheduleActivity" />
-        <activity android:name=".AddAnnouncementActivity" />
-        <activity android:name=".DetailAnnouncementActivity" />
-        <activity android:name=".StudentManagementActivity" />
-        <activity android:name=".AddNoticeActivity" />
-        <activity android:name=".DetailNoticeActivity" />
-        <activity android:name=".DetailPerformanceReportActivity" />
-        <activity android:name=".StudentClassListActivity" />
-        <activity android:name=".StudentDetailActivity" />
-        <activity android:name=".PoseReportActivity" />
     </application>
 
 </manifest>

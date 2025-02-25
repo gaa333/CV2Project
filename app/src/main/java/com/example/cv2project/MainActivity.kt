@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAnimationApi::class)
+
 package com.example.cv2project
 
 import android.app.Activity
@@ -36,6 +38,9 @@ import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +64,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -121,6 +131,7 @@ import com.example.cv2project.preferences.AnnouncementPreferences
 import com.example.cv2project.preferences.CommentPreferences
 import com.example.cv2project.preferences.NoticePreferences
 import com.example.cv2project.preferences.StudentPreferences
+import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 
 class MainActivity : ComponentActivity() {
@@ -145,7 +156,14 @@ fun MyApp() {
     val announcementPrefs = remember { AnnouncementPreferences(context) }
 
 
-    NavHost(navController = navController, startDestination = "main") {
+    AnimatedNavHost(
+        navController = navController,
+        startDestination = "main",
+        enterTransition = { fadeIn(animationSpec = tween(0)) },
+        exitTransition = { fadeOut( animationSpec = tween(0)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(0)) },
+        popExitTransition = { fadeOut(animationSpec = tween(0)) }
+    ) {
         composable("main") { MainScreen(navController) }
         composable("poseAnalysis") { PoseAnalysisScreen(navController) }
         composable("notice") { NoticeScreen(navController) }
@@ -173,7 +191,8 @@ fun MyApp() {
             val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
             val studentName = backStackEntry.arguments?.getString("studentName") ?: "이름 없음"
             val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
-            val noticeId = backStackEntry.arguments?.getString("noticeId") ?: "noticeId" // ✅ noticeId 추출
+            val noticeId =
+                backStackEntry.arguments?.getString("noticeId") ?: "noticeId" // ✅ noticeId 추출
 
             DetailNoticeScreen(
                 navController,
@@ -192,7 +211,7 @@ fun MyApp() {
 
         // Detail Announcement Screen
         composable(
-            route ="detailAnnouncement?title={title}&content={content}&date={date}",
+            route = "detailAnnouncement?title={title}&content={content}&date={date}",
             arguments = listOf(
                 navArgument("title") { type = NavType.StringType },
                 navArgument("content") { type = NavType.StringType },
@@ -254,7 +273,14 @@ fun MyApp() {
             val ankleScore = backStackEntry.arguments?.getFloat("ankleScore")?.toDouble() ?: 0.0
 
             PoseReportScreen(
-                navController, imagePath, hipAngle, kneeAngle, ankleAngle, hipScore, kneeScore, ankleScore
+                navController,
+                imagePath,
+                hipAngle,
+                kneeAngle,
+                ankleAngle,
+                hipScore,
+                kneeScore,
+                ankleScore
             )
         }
 
@@ -271,19 +297,11 @@ fun MyApp() {
 
             DetailPerformanceReportScreen(navController, name, age)
         }
-
-
-
-
-
-
     }
 }
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .padding(WindowInsets.statusBars.only(WindowInsetsSides.Top).asPaddingValues())
