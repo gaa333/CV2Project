@@ -127,6 +127,7 @@ import androidx.compose.foundation.Canvas
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cv2project.auth.AuthManager
 import com.example.cv2project.preferences.AnnouncementPreferences
 import com.example.cv2project.preferences.CommentPreferences
 import com.example.cv2project.preferences.NoticePreferences
@@ -154,17 +155,19 @@ fun MyApp() {
     val noticePrefs = remember { NoticePreferences(context) }
     val commentPrefs = remember { CommentPreferences(context) }
     val announcementPrefs = remember { AnnouncementPreferences(context) }
-
+    val authManager = remember { AuthManager() }
 
     AnimatedNavHost(
         navController = navController,
-        startDestination = "main",
+        startDestination = "login",
         enterTransition = { fadeIn(animationSpec = tween(0)) },
         exitTransition = { fadeOut(animationSpec = tween(0)) },
         popEnterTransition = { fadeIn(animationSpec = tween(0)) },
         popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
-        composable("main") { MainScreen(navController) }
+        composable("login") { LoginScreen(navController, authManager) }
+        composable("signup") { SignUpScreen(navController, authManager) }
+        composable("main") { MainScreen(navController, authManager) }
         composable("poseAnalysis") { PoseAnalysisScreen(navController) }
         composable("notice") { NoticeScreen(navController) }
         composable("announcement") { AnnouncementScreen(navController) }
@@ -301,7 +304,7 @@ fun MyApp() {
 }
 
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, authManager: AuthManager) {
     Column(
         modifier = Modifier
             .padding(WindowInsets.statusBars.only(WindowInsetsSides.Top).asPaddingValues())
@@ -309,10 +312,24 @@ fun MainScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.nextgoal),
-            contentDescription = "앱로고"
-        )
+        Box() {
+            Image(
+                painter = painterResource(id = R.drawable.nextgoal),
+                contentDescription = "앱로고"
+            )
+            Image(
+                painter = painterResource(R.drawable.red),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clickable {
+                        authManager.logout()
+                        navController.navigate("login") {
+                            popUpTo("main") { inclusive = true } // 메인 화면을 스택에서 제거하고 로그인 화면으로 이동
+                        }
+                    }
+            )
+        }
         Spacer(modifier = Modifier.height(30.dp))
         Column(
             modifier = Modifier
