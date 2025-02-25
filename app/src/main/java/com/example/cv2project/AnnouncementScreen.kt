@@ -42,15 +42,16 @@ import java.util.Locale
  */
 @Composable
 fun AnnouncementScreen(navController: NavController) {
-    // Activity Context
-    val context = LocalContext.current as Activity
+    // Context
+    val context = LocalContext.current
 
     // SharedPreferences를 이용한 공지사항 로드
     val announcementPrefs = remember { AnnouncementPreferences(context) }
     var announcements by remember { mutableStateOf(announcementPrefs.loadAnnouncements()) }
+    val filteredAnnouncements = announcements.filter { it.title.isNotBlank() || it.content.isNotBlank() || it.date.isNotBlank() }
 
     // 다른 화면에서 돌아올 때마다 목록을 새로 고침하고 싶다면
-     LaunchedEffect(Unit) { announcements = announcementPrefs.loadAnnouncements() }
+    LaunchedEffect(Unit) { announcements = announcementPrefs.loadAnnouncements() }
 
     // UI 구성
     Column(
@@ -108,41 +109,54 @@ fun AnnouncementScreen(navController: NavController) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 20.dp)
         ) {
-            announcements.forEach { announcement ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable {
-                            navController.navigate(
-                                "detailAnnouncement?title=${announcement.title}" +
-                                        "&content=${announcement.content}" +
-                                        "&date=${announcement.date}"
+            if (filteredAnnouncements.isEmpty()) {
+                Text(
+                    text = "등록된 공지가 없습니다.",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else {
+                filteredAnnouncements.forEach { announcement ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                navController.navigate(
+                                    "detailAnnouncement?title=${announcement.title}" +
+                                            "&content=${announcement.content}" +
+                                            "&date=${announcement.date}"
+                                )
+                            }
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = announcement.title, // 제목
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = announcement.content, fontSize = 14.sp) // 내용
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = announcement.date, // 날짜
+                                fontSize = 12.sp,
+                                color = Color.Gray
                             )
                         }
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = announcement.title, // 제목
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = announcement.content, fontSize = 14.sp) // 내용
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = announcement.date, // 날짜
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
                     }
                 }
             }
         }
     }
 }
+
 @Composable
-fun AddAnnouncementScreen(navController: NavController, announcementPrefs: AnnouncementPreferences) {
+fun AddAnnouncementScreen(
+    navController: NavController,
+    announcementPrefs: AnnouncementPreferences
+) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     val currentDate by remember {
