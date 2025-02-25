@@ -51,7 +51,8 @@ fun PaymentScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(WindowInsets.systemBars.asPaddingValues()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

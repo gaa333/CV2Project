@@ -56,7 +56,9 @@ fun AnnouncementScreen(navController: NavController) {
 
     // UI 구성
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(WindowInsets.systemBars.asPaddingValues()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -167,7 +169,8 @@ fun AddAnnouncementScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .padding(WindowInsets.systemBars.asPaddingValues()),
         verticalArrangement = Arrangement.Center
     ) {
         Text("공지사항 추가", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
@@ -219,7 +222,9 @@ fun DetailAnnouncementScreen(
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(WindowInsets.systemBars.asPaddingValues()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

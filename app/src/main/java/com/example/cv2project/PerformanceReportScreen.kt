@@ -33,7 +33,9 @@ fun PerformanceReportScreen(navController: NavController, studentPrefs: StudentP
     var students by remember { mutableStateOf(studentPrefs.loadAllStudents()) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(WindowInsets.systemBars.asPaddingValues()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 상단 바
