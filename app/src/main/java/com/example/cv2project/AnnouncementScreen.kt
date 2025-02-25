@@ -48,7 +48,8 @@ fun AnnouncementScreen(navController: NavController) {
     // SharedPreferences를 이용한 공지사항 로드
     val announcementPrefs = remember { AnnouncementPreferences(context) }
     var announcements by remember { mutableStateOf(announcementPrefs.loadAnnouncements()) }
-    val filteredAnnouncements = announcements.filter { it.title.isNotBlank() || it.content.isNotBlank() || it.date.isNotBlank() }
+    val filteredAnnouncements =
+        announcements.filter { it.title.isNotBlank() || it.content.isNotBlank() || it.date.isNotBlank() }
 
     // 다른 화면에서 돌아올 때마다 목록을 새로 고침하고 싶다면
     LaunchedEffect(Unit) { announcements = announcementPrefs.loadAnnouncements() }

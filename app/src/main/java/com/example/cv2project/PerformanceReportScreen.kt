@@ -211,7 +211,9 @@ fun ReportCard(date: String, imageRes: Int, hip: String, knee: String, ankle: St
             horizontalArrangement = Arrangement.Center
         ) {
             Column(
-                modifier = Modifier.fillMaxHeight().fillMaxWidth(0.28f)
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.28f)
             ) {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text("Hip Angle")
@@ -222,7 +224,9 @@ fun ReportCard(date: String, imageRes: Int, hip: String, knee: String, ankle: St
             }
 
             Column(
-                modifier = Modifier.fillMaxHeight().fillMaxWidth(0.3f),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.3f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text("적정 각도", fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -235,7 +239,9 @@ fun ReportCard(date: String, imageRes: Int, hip: String, knee: String, ankle: St
             }
 
             Column(
-                modifier = Modifier.fillMaxHeight().fillMaxWidth(0.45f),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.45f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text("측정 각도", fontSize = 18.sp, fontWeight = FontWeight.Bold)

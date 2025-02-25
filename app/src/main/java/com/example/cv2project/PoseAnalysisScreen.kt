@@ -335,7 +335,8 @@ fun PoseAnalysisContent(
                                 }
 
                                 serverResponse.results.firstOrNull()?.let { result ->
-                                    val imageFile = saveImageToFile(context, result.image_data) // ✅ Context 전달
+                                    val imageFile =
+                                        saveImageToFile(context, result.image_data) // ✅ Context 전달
 
                                     // ✅ Intent 대신 NavController를 사용하여 PoseReportScreen으로 이동
                                     navController.navigate(
@@ -477,10 +478,18 @@ fun PoseAnalysisContent(
                                             ContextCompat.getMainExecutor(context),
                                             object : ImageCapture.OnImageSavedCallback {
                                                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                                    Log.d("CameraScreen", "Photo saved: ${outputFileResults.savedUri}")
+                                                    Log.d(
+                                                        "CameraScreen",
+                                                        "Photo saved: ${outputFileResults.savedUri}"
+                                                    )
                                                 }
+
                                                 override fun onError(exception: ImageCaptureException) {
-                                                    Log.e("CameraScreen", "Photo capture failed: ${exception.message}", exception)
+                                                    Log.e(
+                                                        "CameraScreen",
+                                                        "Photo capture failed: ${exception.message}",
+                                                        exception
+                                                    )
                                                 }
                                             }
                                         )
@@ -508,10 +517,11 @@ fun PoseAnalysisContent(
                                                     )
                                                 }
                                             }
-                                            val mediaStoreOutputOptions = MediaStoreOutputOptions.Builder(
-                                                context.contentResolver,
-                                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                                            ).setContentValues(videoContentValues).build()
+                                            val mediaStoreOutputOptions =
+                                                MediaStoreOutputOptions.Builder(
+                                                    context.contentResolver,
+                                                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                                                ).setContentValues(videoContentValues).build()
                                             recording = videoCap.output.prepareRecording(
                                                 context,
                                                 mediaStoreOutputOptions
@@ -520,13 +530,23 @@ fun PoseAnalysisContent(
                                                     when (recordEvent) {
                                                         is VideoRecordEvent.Start -> {
                                                             isRecording = true
-                                                            Log.d("CameraScreen", "Video recording started")
+                                                            Log.d(
+                                                                "CameraScreen",
+                                                                "Video recording started"
+                                                            )
                                                         }
+
                                                         is VideoRecordEvent.Finalize -> {
                                                             if (!recordEvent.hasError()) {
-                                                                Log.d("CameraScreen", "Video saved: ${recordEvent.outputResults.outputUri}")
+                                                                Log.d(
+                                                                    "CameraScreen",
+                                                                    "Video saved: ${recordEvent.outputResults.outputUri}"
+                                                                )
                                                             } else {
-                                                                Log.e("CameraScreen", "Video recording error: ${recordEvent.error}")
+                                                                Log.e(
+                                                                    "CameraScreen",
+                                                                    "Video recording error: ${recordEvent.error}"
+                                                                )
                                                             }
                                                             isRecording = false
                                                             recording = null
@@ -598,7 +618,9 @@ fun processVideo(context: Context, videoUri: Uri, viewModel: PoseAnalysisViewMod
     executorService.execute {
         try {
             retriever.setDataSource(context, videoUri)
-            val videoLengthMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
+            val videoLengthMs =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+                    ?: 0
             val inferenceIntervalMs = 100L
             val numFrames = (videoLengthMs / inferenceIntervalMs).toInt()
 
@@ -613,6 +635,7 @@ fun processVideo(context: Context, videoUri: Uri, viewModel: PoseAnalysisViewMod
                             Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
                         }
                     }
+
                     override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
                         Log.d("PoseAnalysis", "Pose detected: ${resultBundle.results.size}")
                     }
@@ -627,7 +650,10 @@ fun processVideo(context: Context, videoUri: Uri, viewModel: PoseAnalysisViewMod
                     timestampMs
                 else
                     kotlin.math.max(timestampMs, lastTimestampMs + inferenceIntervalMs * 1000L)
-                val frame = retriever.getFrameAtTime(validTimestampMs, MediaMetadataRetriever.OPTION_CLOSEST)
+                val frame = retriever.getFrameAtTime(
+                    validTimestampMs,
+                    MediaMetadataRetriever.OPTION_CLOSEST
+                )
                 if (frame == null) {
                     Log.e("PoseAnalysis", "Frame at timestamp $validTimestampMs is null")
                     continue
@@ -792,7 +818,8 @@ fun PoseReportScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             Column(
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier
+                    .fillMaxHeight()
                     .fillMaxWidth(0.25f)
             ) {
                 Text("", fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -805,7 +832,8 @@ fun PoseReportScreen(
             }
             Spacer(modifier = Modifier.size(10.dp))
             Column(
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier
+                    .fillMaxHeight()
                     .fillMaxWidth(0.3f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -819,7 +847,8 @@ fun PoseReportScreen(
             }
             Spacer(modifier = Modifier.size(15.dp))
             Column(
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier
+                    .fillMaxHeight()
                     .fillMaxWidth(0.45f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -876,7 +905,8 @@ fun saveImageToGallery(context: Context, bitmap: Bitmap, filename: String = "Pos
     }
 
     val contentResolver = context.contentResolver
-    val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+    val imageUri =
+        contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
     imageUri?.let { uri ->
         val outputStream: OutputStream? = contentResolver.openOutputStream(uri)

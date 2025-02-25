@@ -87,7 +87,7 @@ fun StudentClassListScreen(navController: NavController) {
                 contentDescription = "1학년반",
                 modifier = Modifier
                     .clickable {
-                         navController.navigate("studentManagement?className=1학년반") // 만약 StudentManagementScreen이 있다면
+                        navController.navigate("studentManagement?className=1학년반") // 만약 StudentManagementScreen이 있다면
                     }
             )
             Image(
@@ -154,7 +154,11 @@ fun StudentClassListScreen(navController: NavController) {
 }
 
 @Composable
-fun StudentManagementScreen(navController: NavController, studentPrefs: StudentPreferences, selectedClassName: String) {
+fun StudentManagementScreen(
+    navController: NavController,
+    studentPrefs: StudentPreferences,
+    selectedClassName: String
+) {
     var students by remember { mutableStateOf(studentPrefs.loadStudents(selectedClassName)) }
     var isAddingStudent by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }

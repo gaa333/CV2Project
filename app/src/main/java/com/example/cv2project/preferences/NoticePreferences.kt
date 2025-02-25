@@ -30,6 +30,7 @@ class NoticePreferences(context: Context) {
         val jsonString = prefs.getString("notice_list", "[]") ?: "[]"
         return gson.fromJson(jsonString, object : TypeToken<List<Notice>>() {}.type)
     }
+
     fun loadAndDeleteNotice(noticeId: String): List<Notice> {
         // 1) noticeId를 "제목-날짜" 형태로 파싱
         val parts = noticeId.split("-")

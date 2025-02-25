@@ -160,7 +160,7 @@ fun MyApp() {
         navController = navController,
         startDestination = "main",
         enterTransition = { fadeIn(animationSpec = tween(0)) },
-        exitTransition = { fadeOut( animationSpec = tween(0)) },
+        exitTransition = { fadeOut(animationSpec = tween(0)) },
         popEnterTransition = { fadeIn(animationSpec = tween(0)) },
         popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {

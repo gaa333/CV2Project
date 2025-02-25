@@ -10,8 +10,10 @@ data class Announcement(
     val content: String = "",
     val date: String = ""
 )
+
 class AnnouncementPreferences(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("announcements_prefs", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("announcements_prefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 
     fun saveAnnouncements(announcements: List<Announcement>) {
