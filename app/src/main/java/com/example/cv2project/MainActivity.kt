@@ -117,6 +117,7 @@ import androidx.compose.foundation.Canvas
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cv2project.preferences.AnnouncementPreferences
 import com.example.cv2project.preferences.CommentPreferences
 import com.example.cv2project.preferences.NoticePreferences
 import com.example.cv2project.preferences.StudentPreferences
@@ -141,6 +142,7 @@ fun MyApp() {
     val studentPrefs = remember { StudentPreferences(context) }
     val noticePrefs = remember { NoticePreferences(context) }
     val commentPrefs = remember { CommentPreferences(context) }
+    val announcementPrefs = remember { AnnouncementPreferences(context) }
 
 
     NavHost(navController = navController, startDestination = "main") {
@@ -181,6 +183,22 @@ fun MyApp() {
                 commentPrefs = commentPrefs,
                 noticePrefs
             )
+        }
+        composable("addAnnouncement") { AddAnnouncementScreen(navController, announcementPrefs) }
+        composable(
+            route ="detailAnnouncement?title={title}&content={content}&date={date}",
+            arguments = listOf(
+                navArgument("title") { type = NavType.StringType },
+                navArgument("content") { type = NavType.StringType },
+                navArgument("date") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            // 네비게이션 인자로 전달된 데이터를 추출
+            val title = backStackEntry.arguments?.getString("title") ?: "제목 없음"
+            val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
+            val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
+
+            DetailAnnouncementScreen(navController, title, content, date, announcementPrefs)
         }
     }
 }

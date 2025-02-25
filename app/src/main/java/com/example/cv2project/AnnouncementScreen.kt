@@ -13,8 +13,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.cv2project.preferences.Announcement
 import com.example.cv2project.preferences.AnnouncementPreferences
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * 공지사항 Composable
@@ -41,38 +50,7 @@ fun AnnouncementScreen(navController: NavController) {
     var announcements by remember { mutableStateOf(announcementPrefs.loadAnnouncements()) }
 
     // 다른 화면에서 돌아올 때마다 목록을 새로 고침하고 싶다면
-    // LaunchedEffect(Unit) { announcements = announcementPrefs.loadAnnouncements() }
-
-    // Composable에서 ActivityResult를 사용하는 launcher
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val title = result.data?.getStringExtra("announcement_title") ?: ""
-            val content = result.data?.getStringExtra("announcement_content") ?: ""
-            val date = result.data?.getStringExtra("announcement_date") ?: ""
-
-            // 새 공지사항 추가
-            if (title.isNotEmpty() && content.isNotEmpty() && date.isNotEmpty()) {
-                announcements = announcements + Triple(title, content, date)
-                announcementPrefs.saveAnnouncements(announcements)
-            }
-
-            // 삭제 요청 확인
-            val deleteTitle = result.data?.getStringExtra("delete_title")
-            val deleteContent = result.data?.getStringExtra("delete_content")
-            val deleteDate = result.data?.getStringExtra("delete_date")
-
-            if (deleteTitle != null && deleteContent != null && deleteDate != null) {
-                announcements = announcements.filterNot {
-                    it.first == deleteTitle &&
-                            it.second == deleteContent &&
-                            it.third == deleteDate
-                }
-                announcementPrefs.saveAnnouncements(announcements)
-            }
-        }
-    }
+     LaunchedEffect(Unit) { announcements = announcementPrefs.loadAnnouncements() }
 
     // UI 구성
     Column(
@@ -116,8 +94,7 @@ fun AnnouncementScreen(navController: NavController) {
                     .padding(end = 15.dp)
                     .size(30.dp)
                     .clickable {
-                        val intent = Intent(context, AddAnnouncementActivity::class.java)
-                        launcher.launch(intent) // AddAnnouncementActivity 실행
+                        navController.navigate("addAnnouncement")
                     },
                 tint = Color.White
             )
@@ -137,31 +114,169 @@ fun AnnouncementScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                         .clickable {
-                            val intent = Intent(context, DetailAnnouncementActivity::class.java).apply {
-                                putExtra("announcement_title", announcement.first)
-                                putExtra("announcement_content", announcement.second)
-                                putExtra("announcement_date", announcement.third)
-                            }
-                            launcher.launch(intent) // DetailAnnouncementActivity 실행
+                            navController.navigate(
+                                "detailAnnouncement?title=${announcement.title}" +
+                                        "&content=${announcement.content}" +
+                                        "&date=${announcement.date}"
+                            )
                         }
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = announcement.first, // 제목
+                            text = announcement.title, // 제목
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = announcement.second, fontSize = 14.sp) // 내용
+                        Text(text = announcement.content, fontSize = 14.sp) // 내용
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = announcement.third, // 날짜
+                            text = announcement.date, // 날짜
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
                     }
                 }
             }
+        }
+    }
+}
+@Composable
+fun AddAnnouncementScreen(navController: NavController, announcementPrefs: AnnouncementPreferences) {
+    var title by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf("") }
+    val currentDate by remember {
+        mutableStateOf(SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()))
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("공지사항 추가", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("제목 입력") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedTextField(
+            value = content,
+            onValueChange = { content = it },
+            label = { Text("내용 입력") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = {
+                if (title.isNotEmpty() && content.isNotEmpty()) {
+                    val newAnnouncement = Announcement(title, content, currentDate)
+                    val updatedList = announcementPrefs.loadAnnouncements().toMutableList()
+                    updatedList.add(newAnnouncement)
+                    announcementPrefs.saveAnnouncements(updatedList)
+                    navController.popBackStack() // 저장 후 목록 화면으로 이동
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+        ) {
+            Text("저장")
+        }
+    }
+}
+
+@Composable
+fun DetailAnnouncementScreen(
+    navController: NavController,
+    title: String,
+    content: String,
+    date: String,
+    announcementPrefs: AnnouncementPreferences
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(color = Color.Black),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "뒤로가기",
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .size(25.dp)
+                    .clickable { navController.popBackStack() },
+                tint = Color.White
+            )
+
+            Text("공지사항 내용", color = Color.White, fontSize = 25.sp)
+
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "삭제",
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(25.dp)
+                    .clickable { showDialog = true },
+                tint = Color.White
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp)
+        ) {
+            Spacer(modifier = Modifier.size(10.dp))
+            Text(text = title, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.size(20.dp))
+            Text(text = content, fontSize = 18.sp)
+            Spacer(modifier = Modifier.size(50.dp))
+            Text(text = "작성 날짜: $date", fontSize = 14.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("공지사항 삭제") },
+                text = { Text("삭제하시겠습니까?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val updatedList = announcementPrefs.loadAnnouncements()
+                                .filterNot { it.title == title && it.content == content && it.date == date }
+                            announcementPrefs.saveAnnouncements(updatedList)
+                            navController.popBackStack()
+                        }
+                    ) {
+                        Text("삭제")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDialog = false }) {
+                        Text("취소")
+                    }
+                }
+            )
         }
     }
 }
