@@ -161,6 +161,7 @@ fun NoticeContent(
             )
         }
 
+
         // 알림 목록
         Column(
             modifier = Modifier
