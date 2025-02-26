@@ -1,5 +1,6 @@
 package com.example.cv2project
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,6 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role.Companion.Image
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -28,37 +32,47 @@ fun LoginScreen(navController: NavController, authManager: AuthManager) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color.Black)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("로그인", style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
+        Image(
+            painter = painterResource(id = R.drawable.nextgoal1),
+            contentDescription = "로그인 앱 로고",
+            modifier = Modifier.size(300.dp)
+        )
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("이메일") },
+            label = { Text("이메일", color = Color.White) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             ),
-            modifier = Modifier.fillMaxWidth()
+            textStyle = TextStyle(color = Color.White),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Green,
+                unfocusedBorderColor = Color.White
+            ),
+            modifier = Modifier.width(330.dp)
         )
-
         Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("비밀번호") },
+            label = { Text("비밀번호",color = Color.White) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
             ),
-            modifier = Modifier.fillMaxWidth()
+            textStyle = TextStyle(color = Color.White),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Green,
+                unfocusedBorderColor = Color.White
+            ),
+            modifier = Modifier.width(330.dp)
         )
 
         Spacer(modifier = Modifier.height(20.dp))

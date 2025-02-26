@@ -51,32 +51,33 @@ fun PaymentScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .systemBarsPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 상단 바
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable {
-                        // Activity finish() 대신 Navigation 뒤로가기
                         navController.popBackStack()
-                    },
-                tint = Color.White
+                    }
             )
-            Text("원비 결제", color = Color.White, fontSize = 25.sp)
+            Image(
+                painter = painterResource(id = R.drawable.pay1),
+                contentDescription = "원비 결제",
+                modifier = Modifier.size(150.dp)
+            )
             Icon(
                 imageVector = Icons.Default.Share,
                 contentDescription = "공유",

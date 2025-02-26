@@ -25,46 +25,36 @@ import androidx.navigation.NavController
 @Composable
 fun PickupServiceScreen(navController: NavController) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 상단 바(뒤로가기, 공유 아이콘, 제목)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // 뒤로가기 버튼
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable {
-                        // 네비게이션으로 뒤로가기
                         navController.popBackStack()
-                    },
-                tint = Color.White
+                    }
             )
-            Text(
-                text = "픽업 서비스",
-                fontSize = 25.sp,
-                color = Color.White
+            Spacer(modifier = Modifier.weight(0.8f))
+            Image(
+                painter = painterResource(id = R.drawable.pickup1),
+                contentDescription = "픽업서비스",
+                modifier = Modifier.size(180.dp)
             )
-            // 공유 아이콘 (현재 동작 없음)
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "공유",
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(25.dp),
-                tint = Color.White
-            )
+            Spacer(modifier = Modifier.weight(1.2f))
         }
         Spacer(modifier = Modifier.weight(0.1f))
 

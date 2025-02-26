@@ -219,12 +219,12 @@ fun StudentManagementScreen(
         ) {
             Spacer(modifier = Modifier.height(20.dp))
             // 학생 리스트 출력
-            students.forEach { student ->
-                StudentCard(student = student) { selectedStudent ->
-                    navController.navigate("studentDetail?studentName=음바페")
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
+//            students.forEach { student ->
+//                StudentCard(student = student) { selectedStudent ->
+//                    navController.navigate("studentDetail?studentName=음바페")
+//                }
+//                Spacer(modifier = Modifier.height(10.dp))
+//            }
         }
 
 //        Column(
