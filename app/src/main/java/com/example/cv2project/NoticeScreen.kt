@@ -53,6 +53,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.cv2project.auth.AuthManager
 import com.example.cv2project.firebase.NoticeDatabase
 import com.example.cv2project.firebase.StudentDatabase
 import com.example.cv2project.models.Comment
@@ -253,15 +254,25 @@ fun AddNoticeScreen(
 fun DetailNoticeScreen(
     navController: NavController,
     notice: Notice,
-    noticeDb: NoticeDatabase
+    noticeDb: NoticeDatabase,
+    authManager: AuthManager
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showCommentDialog by remember { mutableStateOf(false) }
     var comments by remember { mutableStateOf<List<Comment>>(emptyList()) }
     var newComment by remember { mutableStateOf("") }
+    var userName by remember { mutableStateOf("사용자") }
 
     // Firebase에서 해당 알림의 댓글 가져오기
     LaunchedEffect(Unit) {
+        // 현재 로그인한 사용자 정보 가져오기 (이름 포함)
+        authManager.getCurrentUserInfo { user ->
+            user?.let {
+                userName = it.name // 사용자 이름 저장
+            }
+        }
+
+        // Firebase에서 해당 알림의 댓글 가져오기
         noticeDb.getComments(notice.id) { fetchedComments ->
             comments = fetchedComments
         }
@@ -433,7 +444,7 @@ fun DetailNoticeScreen(
                                     ).format(Date())
                                 val comment = Comment(
                                     id = "",
-                                    author = "사용자",
+                                    author = userName,
                                     text = newComment,
                                     timestamp = timestamp
                                 )

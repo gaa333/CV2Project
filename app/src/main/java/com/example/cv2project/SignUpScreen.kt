@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignUpScreen(navController: NavController, authManager: AuthManager) {
     val coroutineScope = rememberCoroutineScope()
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -45,6 +46,15 @@ fun SignUpScreen(navController: NavController, authManager: AuthManager) {
         Text("회원가입", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(20.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("이름") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = email,
@@ -82,7 +92,7 @@ fun SignUpScreen(navController: NavController, authManager: AuthManager) {
             onClick = {
                 if (password == confirmPassword) {
                     coroutineScope.launch {
-                        val user = authManager.signUp(email, password)
+                        val user = authManager.signUp(name, email, password)
                         if (user != null) {
                             navController.popBackStack()
                         } else {

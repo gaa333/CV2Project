@@ -57,7 +57,6 @@ import com.example.cv2project.models.Announcement
 import com.example.cv2project.models.Notice
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +72,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
-    val context = LocalContext.current
     val noticeDb = remember { NoticeDatabase() }
     val announcementDb = remember { AnnouncementDatabase() }
     val studentDb = remember { StudentDatabase() }
@@ -119,7 +117,7 @@ fun MyApp() {
             val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
 
             val notice = Notice(id, title, content, studentName, date)
-            DetailNoticeScreen(navController, notice, noticeDb)
+            DetailNoticeScreen(navController, notice, noticeDb, authManager)
         }
 
         // Add Announcement Screen
