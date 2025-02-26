@@ -2,44 +2,10 @@
 
 package com.example.cv2project
 
-import android.app.Activity
-import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.media.MediaMetadataRetriever
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Base64
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.ComponentActivity.RESULT_OK
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.video.MediaStoreOutputOptions
-import androidx.camera.video.Quality
-import androidx.camera.video.QualitySelector
-import androidx.camera.video.Recorder
-import androidx.camera.video.Recording
-import androidx.camera.video.VideoCapture
-import androidx.camera.video.VideoRecordEvent
-import androidx.camera.view.PreviewView
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,75 +26,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-//import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.mediapipe.tasks.vision.core.RunningMode
-import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.io.File
-import java.io.FileOutputStream
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlin.math.max
-import androidx.compose.foundation.Canvas
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cv2project.auth.AuthManager
-import com.example.cv2project.preferences.AnnouncementPreferences
+import com.example.cv2project.firebase.AnnouncementDatabase
+import com.example.cv2project.models.Announcement
 import com.example.cv2project.preferences.CommentPreferences
 import com.example.cv2project.preferences.NoticePreferences
 import com.example.cv2project.preferences.StudentPreferences
@@ -154,7 +77,8 @@ fun MyApp() {
     val studentPrefs = remember { StudentPreferences(context) }
     val noticePrefs = remember { NoticePreferences(context) }
     val commentPrefs = remember { CommentPreferences(context) }
-    val announcementPrefs = remember { AnnouncementPreferences(context) }
+    val announcementDb = remember { AnnouncementDatabase() }
+
     val authManager = remember { AuthManager() }
 
     AnimatedNavHost(
@@ -171,7 +95,7 @@ fun MyApp() {
         composable("main") { MainScreen(navController, authManager) }
         composable("poseAnalysis") { PoseAnalysisScreen(navController) }
         composable("notice") { NoticeScreen(navController) }
-        composable("announcement") { AnnouncementScreen(navController) }
+        composable("announcement") { AnnouncementScreen(navController, announcementDb) }
         composable("schedule") { ScheduleScreen(navController) }
         composable("pickupService") { PickupServiceScreen(navController) }
         composable("payment") { PaymentScreen(navController) }
@@ -211,23 +135,25 @@ fun MyApp() {
         }
 
         // Add Announcement Screen
-        composable("addAnnouncement") { AddAnnouncementScreen(navController, announcementPrefs) }
+        composable("addAnnouncement") { AddAnnouncementScreen(navController, announcementDb) }
 
         // Detail Announcement Screen
         composable(
-            route = "detailAnnouncement?title={title}&content={content}&date={date}",
+            route = "detailAnnouncement?id={id}&title={title}&content={content}&date={date}",
             arguments = listOf(
+                navArgument("id") { type = NavType.StringType },
                 navArgument("title") { type = NavType.StringType },
                 navArgument("content") { type = NavType.StringType },
                 navArgument("date") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             // 네비게이션 인자로 전달된 데이터를 추출
+            val id = backStackEntry.arguments?.getString("id") ?: ""
             val title = backStackEntry.arguments?.getString("title") ?: "제목 없음"
             val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
             val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
-
-            DetailAnnouncementScreen(navController, title, content, date, announcementPrefs)
+            val announcement = Announcement(id, title, content, date)
+            DetailAnnouncementScreen(navController, announcement, announcementDb)
         }
 
         // Student Management Screen
@@ -412,4 +338,3 @@ fun MenuButton(imageResId: Int, navController: NavController, route: String) {
             .size(90.dp) // 이미지 크기 조정
     )
 }
-

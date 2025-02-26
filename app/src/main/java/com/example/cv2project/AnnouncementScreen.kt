@@ -1,10 +1,5 @@
 package com.example.cv2project
 
-import android.app.Activity
-import android.app.Activity.RESULT_OK
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.cv2project.preferences.Announcement
-import com.example.cv2project.preferences.AnnouncementPreferences
+import com.example.cv2project.firebase.AnnouncementDatabase
+import com.example.cv2project.models.Announcement
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -41,20 +36,17 @@ import java.util.Locale
  * 네비게이션에서 route를 "announcement"로 등록해서 사용
  */
 @Composable
-fun AnnouncementScreen(navController: NavController) {
-    // Context
+fun AnnouncementScreen(navController: NavController, announcementDb: AnnouncementDatabase) {
     val context = LocalContext.current
+    var announcements by remember { mutableStateOf<List<Announcement>>(emptyList()) }
 
-    // SharedPreferences를 이용한 공지사항 로드
-    val announcementPrefs = remember { AnnouncementPreferences(context) }
-    var announcements by remember { mutableStateOf(announcementPrefs.loadAnnouncements()) }
-    val filteredAnnouncements =
-        announcements.filter { it.title.isNotBlank() || it.content.isNotBlank() || it.date.isNotBlank() }
+    // Firebase에서 공지사항 가져오기
+    LaunchedEffect(Unit) {
+        announcementDb.getAnnouncements { loadedAnnouncements ->
+            announcements = loadedAnnouncements
+        }
+    }
 
-    // 다른 화면에서 돌아올 때마다 목록을 새로 고침하고 싶다면
-    LaunchedEffect(Unit) { announcements = announcementPrefs.loadAnnouncements() }
-
-    // UI 구성
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
@@ -69,35 +61,25 @@ fun AnnouncementScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // 뒤로가기 버튼
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable {
-                        navController.popBackStack() // 뒤로 가기
-                    },
+                    .clickable { navController.popBackStack() },
                 tint = Color.White
             )
 
-            Text(
-                "공지사항",
-                color = Color.White,
-                fontSize = 25.sp,
-            )
+            Text("공지사항", color = Color.White, fontSize = 25.sp)
 
-            // 공지 추가 버튼
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(30.dp)
-                    .clickable {
-                        navController.navigate("addAnnouncement")
-                    },
+                    .clickable { navController.navigate("addAnnouncement") },
                 tint = Color.White
             )
         }
@@ -110,22 +92,23 @@ fun AnnouncementScreen(navController: NavController) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 20.dp)
         ) {
-            if (filteredAnnouncements.isEmpty()) {
+            if (announcements.isEmpty()) {
                 Text(
-                    text = "등록된 공지가 없습니다.",
+                    "등록된 공지가 없습니다.",
                     fontSize = 16.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(16.dp)
                 )
             } else {
-                filteredAnnouncements.forEach { announcement ->
+                announcements.forEach { announcement ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable {
                                 navController.navigate(
-                                    "detailAnnouncement?title=${announcement.title}" +
+                                    "detailAnnouncement?id=${announcement.id}" +
+                                            "&title=${announcement.title}" +
                                             "&content=${announcement.content}" +
                                             "&date=${announcement.date}"
                                 )
@@ -133,18 +116,14 @@ fun AnnouncementScreen(navController: NavController) {
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = announcement.title, // 제목
+                                text = announcement.title,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = announcement.content, fontSize = 14.sp) // 내용
+                            Text(text = announcement.content, fontSize = 14.sp)
                             Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = announcement.date, // 날짜
-                                fontSize = 12.sp,
-                                color = Color.Gray
-                            )
+                            Text(text = announcement.date, fontSize = 12.sp, color = Color.Gray)
                         }
                     }
                 }
@@ -154,14 +133,16 @@ fun AnnouncementScreen(navController: NavController) {
 }
 
 @Composable
-fun AddAnnouncementScreen(
-    navController: NavController,
-    announcementPrefs: AnnouncementPreferences
-) {
+fun AddAnnouncementScreen(navController: NavController, announcementDb: AnnouncementDatabase) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     val currentDate by remember {
-        mutableStateOf(SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()))
+        mutableStateOf(
+            SimpleDateFormat(
+                "yyyy-MM-dd HH:mm",
+                Locale.getDefault()
+            ).format(Date())
+        )
     }
 
     Column(
@@ -178,7 +159,6 @@ fun AddAnnouncementScreen(
             label = { Text("제목 입력") },
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
@@ -187,17 +167,20 @@ fun AddAnnouncementScreen(
             label = { Text("내용 입력") },
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {
                 if (title.isNotEmpty() && content.isNotEmpty()) {
-                    val newAnnouncement = Announcement(title, content, currentDate)
-                    val updatedList = announcementPrefs.loadAnnouncements().toMutableList()
-                    updatedList.add(newAnnouncement)
-                    announcementPrefs.saveAnnouncements(updatedList)
-                    navController.popBackStack() // 저장 후 목록 화면으로 이동
+                    val newAnnouncement = Announcement(
+                        id = "",  // ✅ Firebase에서 자동 생성되므로 빈 문자열로 초기화
+                        title = title,
+                        content = content,
+                        date = currentDate
+                    )
+                    announcementDb.saveAnnouncement(newAnnouncement) { success ->
+                        if (success) navController.popBackStack()
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -211,10 +194,8 @@ fun AddAnnouncementScreen(
 @Composable
 fun DetailAnnouncementScreen(
     navController: NavController,
-    title: String,
-    content: String,
-    date: String,
-    announcementPrefs: AnnouncementPreferences
+    announcement: Announcement,
+    announcementDb: AnnouncementDatabase
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -261,11 +242,11 @@ fun DetailAnnouncementScreen(
                 .padding(20.dp)
         ) {
             Spacer(modifier = Modifier.size(10.dp))
-            Text(text = title, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Text(text = announcement.title, fontSize = 30.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.size(20.dp))
-            Text(text = content, fontSize = 18.sp)
+            Text(text = announcement.content, fontSize = 18.sp)
             Spacer(modifier = Modifier.size(50.dp))
-            Text(text = "작성 날짜: $date", fontSize = 14.sp, color = Color.Gray)
+            Text(text = "작성 날짜: ${announcement.date}", fontSize = 14.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(20.dp))
         }
 
@@ -277,10 +258,11 @@ fun DetailAnnouncementScreen(
                 confirmButton = {
                     Button(
                         onClick = {
-                            val updatedList = announcementPrefs.loadAnnouncements()
-                                .filterNot { it.title == title && it.content == content && it.date == date }
-                            announcementPrefs.saveAnnouncements(updatedList)
-                            navController.popBackStack()
+                            announcementDb.deleteAnnouncement(announcement.id) { success ->
+                                if (success) {
+                                    navController.popBackStack()
+                                }
+                            }
                         }
                     ) {
                         Text("삭제")
