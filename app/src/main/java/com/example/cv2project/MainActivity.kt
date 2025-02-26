@@ -52,9 +52,9 @@ import androidx.navigation.navArgument
 import com.example.cv2project.auth.AuthManager
 import com.example.cv2project.firebase.AnnouncementDatabase
 import com.example.cv2project.firebase.NoticeDatabase
+import com.example.cv2project.firebase.StudentDatabase
 import com.example.cv2project.models.Announcement
 import com.example.cv2project.models.Notice
-import com.example.cv2project.preferences.StudentPreferences
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 
@@ -74,10 +74,9 @@ class MainActivity : ComponentActivity() {
 fun MyApp() {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val studentPrefs = remember { StudentPreferences(context) }
     val noticeDb = remember { NoticeDatabase() }
     val announcementDb = remember { AnnouncementDatabase() }
-
+    val studentDb = remember { StudentDatabase() }
     val authManager = remember { AuthManager() }
 
     AnimatedNavHost(
@@ -99,8 +98,8 @@ fun MyApp() {
         composable("pickupService") { PickupServiceScreen(navController) }
         composable("payment") { PaymentScreen(navController) }
         composable("studentClassList") { StudentClassListScreen(navController) }
-        composable("performanceReport") { PerformanceReportScreen(navController, studentPrefs) }
-        composable("addNotice") { AddNoticeScreen(navController, studentPrefs, noticeDb) }
+        composable("performanceReport") { PerformanceReportScreen(navController, studentDb) }
+        composable("addNotice") { AddNoticeScreen(navController, studentDb, noticeDb) }
 
         // Detail Notice Screen
         composable(
@@ -153,7 +152,7 @@ fun MyApp() {
             )
         ) { backStackEntry ->
             val className = backStackEntry.arguments?.getString("className") ?: "반 이름 없음"
-            StudentManagementScreen(navController, studentPrefs, className)
+            StudentManagementScreen(navController, studentDb, className)
         }
 
         // Student Detail Screen
@@ -205,16 +204,18 @@ fun MyApp() {
 
         // Detail Performance Report Screen
         composable(
-            "detailPerformanceReport?name={name}&age={age}",
+            "detailPerformanceReport?id={id}&name={name}&age={age}",
             arguments = listOf(
+                navArgument("id") { type = NavType.StringType; defaultValue = "" }, // ✅ id 추가
                 navArgument("name") { type = NavType.StringType; defaultValue = "Unknown" },
                 navArgument("age") { type = NavType.IntType; defaultValue = 0 }
             )
         ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
             val name = backStackEntry.arguments?.getString("name") ?: "Unknown"
             val age = backStackEntry.arguments?.getInt("age") ?: 0
 
-            DetailPerformanceReportScreen(navController, name, age)
+            DetailPerformanceReportScreen(navController, id, name, age)
         }
     }
 }

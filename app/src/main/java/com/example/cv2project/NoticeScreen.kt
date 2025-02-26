@@ -54,10 +54,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.cv2project.firebase.NoticeDatabase
+import com.example.cv2project.firebase.StudentDatabase
 import com.example.cv2project.models.Comment
 import com.example.cv2project.models.Notice
-import com.example.cv2project.preferences.Student
-import com.example.cv2project.preferences.StudentPreferences
+import com.example.cv2project.models.Student
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -157,14 +157,21 @@ fun NoticeScreen(navController: NavController, noticeDb: NoticeDatabase) {
 @Composable
 fun AddNoticeScreen(
     navController: NavController,
-    studentPrefs: StudentPreferences,
+    studentDb: StudentDatabase,
     noticeDb: NoticeDatabase
 ) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var students by remember { mutableStateOf(studentPrefs.loadAllStudents()) }
+    var students by remember { mutableStateOf<List<Student>>(emptyList()) }
     var selectedStudent by remember { mutableStateOf<Student?>(null) }
     val todayDate = getTodayDate() // 오늘 날짜 가져오기
+
+    // Firebase에서 전체 학생 목록 불러오기
+    LaunchedEffect(Unit) {
+        studentDb.loadAllStudents { loadedStudents ->
+            students = loadedStudents
+        }
+    }
 
     Column(
         modifier = Modifier

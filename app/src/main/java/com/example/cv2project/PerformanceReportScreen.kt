@@ -19,8 +19,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
-import com.example.cv2project.preferences.Student
-import com.example.cv2project.preferences.StudentPreferences
+import com.example.cv2project.firebase.StudentDatabase
+import com.example.cv2project.models.Student
 
 /**
  * 성과 보고서 Composable
@@ -28,9 +28,16 @@ import com.example.cv2project.preferences.StudentPreferences
  */
 // 학생 목록
 @Composable
-fun PerformanceReportScreen(navController: NavController, studentPrefs: StudentPreferences) {
+fun PerformanceReportScreen(navController: NavController, studentDb: StudentDatabase) {
     // 기존 Activity에서 studentPrefs를 받았으므로, 외부에서 DI 해주는 방식으로 변경
-    var students by remember { mutableStateOf(studentPrefs.loadAllStudents()) }
+    var students by remember { mutableStateOf<List<Student>>(emptyList()) }
+
+    // Firebase에서 학생 목록 불러오기
+    LaunchedEffect(Unit) {
+        studentDb.loadAllStudents { fetchedStudents ->
+            students = fetchedStudents
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -118,9 +125,19 @@ fun StudentCard(student: Student, onClick: (Student) -> Unit) {
 @Composable
 fun DetailPerformanceReportScreen(
     navController: NavController,
+    id: String,  // ✅ 학생 ID 추가
     name: String,
     age: Int
 ) {
+    var student by remember { mutableStateOf<Student?>(null) }
+
+    // ✅ Firebase에서 학생 정보 가져오기
+    LaunchedEffect(id) {
+        StudentDatabase().getStudentById(id) { fetchedStudent ->
+            student = fetchedStudent
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -140,11 +157,11 @@ fun DetailPerformanceReportScreen(
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { navController.popBackStack() }, // ✅ NavController 활용
+                    .clickable { navController.popBackStack() },
                 tint = Color.White
             )
             Text(
-                name,
+                student?.name ?: name,  // ✅ Firebase에서 가져온 데이터가 있으면 사용
                 color = Color.White,
                 fontSize = 25.sp
             )
