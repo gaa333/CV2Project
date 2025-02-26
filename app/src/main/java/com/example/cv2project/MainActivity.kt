@@ -159,12 +159,13 @@ fun MyApp() {
 
     AnimatedNavHost(
         navController = navController,
-        startDestination = "login",
+        startDestination = "splash",
         enterTransition = { fadeIn(animationSpec = tween(0)) },
         exitTransition = { fadeOut(animationSpec = tween(0)) },
         popEnterTransition = { fadeIn(animationSpec = tween(0)) },
         popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
+        composable("splash") { SplashScreen(navController, authManager) }
         composable("login") { LoginScreen(navController, authManager) }
         composable("signup") { SignUpScreen(navController, authManager) }
         composable("main") { MainScreen(navController, authManager) }
@@ -321,7 +322,7 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager) {
                 painter = painterResource(R.drawable.red),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(40.dp)
                     .clickable {
                         authManager.logout()
                         navController.navigate("login") {

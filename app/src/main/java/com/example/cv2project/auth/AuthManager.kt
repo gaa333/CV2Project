@@ -32,6 +32,18 @@ class AuthManager {
         }
     }
 
+    // 익명 로그인
+    fun signInAnonymously(onResult: (Boolean, String?) -> Unit) {
+        auth.signInAnonymously()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true, null) // 로그인 성공
+                } else {
+                    onResult(false, task.exception?.message) // 로그인 실패
+                }
+            }
+    }
+
     // 로그아웃
     fun logout() {
         auth.signOut()

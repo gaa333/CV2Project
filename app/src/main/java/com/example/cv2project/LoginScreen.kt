@@ -92,5 +92,25 @@ fun LoginScreen(navController: NavController, authManager: AuthManager) {
         ) {
             Text("회원가입")
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // 익명 로그인 버튼 추가 ✅
+        Button(
+            onClick = {
+                authManager.signInAnonymously { success, error ->
+                    if (success) {
+                        navController.navigate("main") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    } else {
+                        errorMessage = "익명 로그인 실패: $error"
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("익명으로 로그인")
+        }
     }
 }
