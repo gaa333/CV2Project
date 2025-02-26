@@ -40,39 +40,36 @@ fun PerformanceReportScreen(navController: NavController, studentDb: StudentData
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 상단 바
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable {
-                        // Navigation 뒤로가기
                         navController.popBackStack()
-                    },
-                tint = Color.White
+                    }
             )
-            Text("성과보고서", color = Color.White, fontSize = 25.sp)
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "공유",
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(25.dp),
-                tint = Color.White
+            Spacer(modifier = Modifier.weight(0.8f))
+            Image(
+                painter = painterResource(id = R.drawable.report1),
+                contentDescription = "성과보고서",
+                modifier = Modifier.size(200.dp)
             )
+            Spacer(modifier = Modifier.weight(1.2f))
         }
 
         // 본문
@@ -139,42 +136,44 @@ fun DetailPerformanceReportScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { navController.popBackStack() },
-                tint = Color.White
+                    .clickable {
+                        navController.popBackStack()
+                    }
             )
+            Spacer(modifier = Modifier.weight(0.9f))
             Text(
                 student?.name ?: name,  // ✅ Firebase에서 가져온 데이터가 있으면 사용
-                color = Color.White,
-                fontSize = 25.sp
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold
             )
-
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(25.dp)
-                    .clickable { },
-                tint = Color.White
-            )
+//            Icon(
+//                imageVector = Icons.Default.Share,
+//                contentDescription = "",
+//                modifier = Modifier
+//                    .padding(end = 15.dp)
+//                    .size(25.dp)
+//                    .clickable { }
+//            )
+            Spacer(modifier = Modifier.weight(1.1f))
         }
 
         Spacer(modifier = Modifier.height(10.dp))

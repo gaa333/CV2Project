@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.ui.draw.scale
@@ -232,22 +233,23 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager) {
         Box() {
             Image(
                 painter = painterResource(id = R.drawable.nextgoal),
-                contentDescription = "앱로고"
+                contentDescription = "앱로고",
             )
             Image(
-                painter = painterResource(R.drawable.red),
-                contentDescription = null,
+                painter = painterResource(R.drawable.logout),
+                contentDescription = "로그아웃",
                 modifier = Modifier
                     .size(40.dp)
+                    .offset(x = 20.dp, y = 24.dp)
                     .clickable {
                         authManager.logout()
                         navController.navigate("login") {
-                            popUpTo("main") { inclusive = true } // 메인 화면을 스택에서 제거하고 로그인 화면으로 이동
+                            popUpTo("main") { inclusive = true }
                         }
                     }
             )
         }
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
