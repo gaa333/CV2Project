@@ -33,33 +33,37 @@ fun StudentClassListScreen(navController: NavController) {
     var newClassName by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 상단 바
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // 뒤로가기 버튼
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable {
-                        // 네비게이션으로 뒤로가기
                         navController.popBackStack()
-                    },
-                tint = Color.White
+                    }
             )
 
-            Text(text = "반 목록", fontSize = 25.sp, color = Color.White)
+            Image(
+                painter = painterResource(id = R.drawable.student7),
+                contentDescription = "반 목록",
+                modifier = Modifier.size(150.dp)
+            )
 
             // 새 반 추가 버튼
             Icon(
@@ -68,8 +72,7 @@ fun StudentClassListScreen(navController: NavController) {
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(30.dp)
-                    .clickable { isAddingClass = true },
-                tint = Color.White
+                    .clickable { isAddingClass = true }
             )
         }
 
@@ -127,7 +130,7 @@ fun StudentClassListScreen(navController: NavController) {
                                 newClassName = "${newClassName}세반"
                             }
                         },
-                        label = { Text("숫자 입력") }
+                        label = { Text("반 이름") }
                     )
                 },
                 confirmButton = {
@@ -138,14 +141,18 @@ fun StudentClassListScreen(navController: NavController) {
                                 newClassName = ""
                                 isAddingClass = false
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
                     ) {
-                        Text("추가")
+                        Text("추가", color = Color.White)
                     }
                 },
                 dismissButton = {
-                    Button(onClick = { isAddingClass = false }) {
-                        Text("취소")
+                    Button(
+                        onClick = { isAddingClass = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
+                    ) {
+                        Text("취소", color = Color.White)
                     }
                 }
             )
@@ -172,31 +179,33 @@ fun StudentManagementScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { navController.popBackStack() }, // 뒤로가기 처리
-                tint = Color.White
+                    .clickable {
+                        navController.popBackStack()
+                    }
             )
-            Text(
-                text = "학생 프로필",
-                color = Color.White,
-                fontSize = 25.sp,
-                modifier = Modifier.align(Alignment.CenterVertically)
+            Image(
+                painter = painterResource(id = R.drawable.student8),
+                contentDescription = "학생 프로필 목록",
+                modifier = Modifier.size(150.dp)
             )
             Icon(
                 imageVector = Icons.Default.Edit,
@@ -204,69 +213,67 @@ fun StudentManagementScreen(
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(25.dp)
-                    .clickable { isAddingStudent = true }, // 학생 추가 다이얼로그 활성화
-                tint = Color.White
+                    .clickable { isAddingStudent = true }
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
 
-        Column(
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 20.dp)
-        ) {
-            Spacer(modifier = Modifier.height(20.dp))
-            // 학생 리스트 출력
-            students.forEach { student ->
-                StudentCard(student = student) { selectedStudent ->
-                    navController.navigate("studentDetail?studentName=음바페")
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-        }
-
 //        Column(
 //            modifier = Modifier
-//                .fillMaxWidth()
-//                .verticalScroll(rememberScrollState()),
-//            verticalArrangement = Arrangement.Top,
-//            horizontalAlignment = Alignment.CenterHorizontally,
+//                .padding(10.dp)
+//                .fillMaxSize()
+//                .verticalScroll(rememberScrollState())
+//                .padding(bottom = 20.dp)
 //        ) {
-//            Image(
-//                painter = painterResource(id = R.drawable.profile2),
-//                contentDescription = "검색",
-//                modifier = Modifier.padding(start = 5.dp, end = 5.dp)
-//            )
-//            Spacer(modifier = Modifier.height(15.dp))
-//
-//            // ✅ 네비게이션을 사용하여 학생 상세 정보 화면으로 이동
-//            Image(
-//                painter = painterResource(id = R.drawable.profile3),
-//                contentDescription = "음바페",
-//                modifier = Modifier
-//                    .clickable {
-//                        navController.navigate("studentDetail?studentName=음바페")
-//                    }
-//            )
-//            Image(
-//                painter = painterResource(id = R.drawable.profile4),
-//                contentDescription = "손흥민"
-//            )
-//            Image(
-//                painter = painterResource(id = R.drawable.profile5),
-//                contentDescription = "호날두"
-//            )
-//            Image(
-//                painter = painterResource(id = R.drawable.profile6),
-//                contentDescription = "메시"
-//            )
-//            Image(
-//                painter = painterResource(id = R.drawable.profile7),
-//                contentDescription = "네이마르"
-//            )
+//            Spacer(modifier = Modifier.height(20.dp))
+//            // 학생 리스트 출력
+//            students.forEach { student ->
+//                StudentCard(student = student) { selectedStudent ->
+//                    navController.navigate("studentDetail?studentName=음바페")
+//                }
+//                Spacer(modifier = Modifier.height(10.dp))
+//            }
 //        }
+
+        Image(
+            painter = painterResource(id = R.drawable.profile2),
+            contentDescription = "검색",
+            modifier = Modifier.padding(start = 5.dp, end = 5.dp)
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // ✅ 네비게이션을 사용하여 학생 상세 정보 화면으로 이동
+            Image(
+                painter = painterResource(id = R.drawable.profile3),
+                contentDescription = "음바페",
+                modifier = Modifier
+                    .clickable {
+                        navController.navigate("studentDetail?studentName=음바페")
+                    }
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile4),
+                contentDescription = "손흥민"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile5),
+                contentDescription = "호날두"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile6),
+                contentDescription = "메시"
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile7),
+                contentDescription = "네이마르"
+            )
+        }
     }
 
     // ✅ 학생 추가 다이얼로그
@@ -311,9 +318,10 @@ fun StudentManagementScreen(
                             name = ""
                             age = ""
                             isAddingStudent = false
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
                     ) {
-                        Text("취소")
+                        Text("취소", color = Color.White)
                     }
 
                     Button(
@@ -343,9 +351,10 @@ fun StudentManagementScreen(
                                     }
                                 }
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
                     ) {
-                        Text("저장")
+                        Text("저장", color = Color.White)
                     }
                 }
             }

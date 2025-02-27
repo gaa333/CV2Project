@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.ui.draw.scale
@@ -233,10 +234,11 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager) {
                 contentDescription = "앱로고"
             )
             Image(
-                painter = painterResource(R.drawable.red),
+                painter = painterResource(R.drawable.logout),
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
+                    .offset(x = 18.dp, y = 20.dp)
                     .clickable {
                         authManager.logout()
                         navController.navigate("login") {
@@ -245,7 +247,7 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager) {
                     }
             )
         }
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()

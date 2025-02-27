@@ -454,7 +454,7 @@ fun PoseAnalysisContent(
                             modifier = Modifier
                                 .size(50.dp)
                                 .clickable {
-                                    imageCapture?.let { capture ->
+                                    imageCapture.let { capture ->
                                         val imageContentValues = ContentValues().apply {
                                             put(
                                                 MediaStore.MediaColumns.DISPLAY_NAME,
@@ -502,7 +502,7 @@ fun PoseAnalysisContent(
                             modifier = Modifier
                                 .size(50.dp)
                                 .clickable {
-                                    videoCapture?.let { videoCap ->
+                                    videoCapture.let { videoCap ->
                                         if (recording == null) {
                                             val videoContentValues = ContentValues().apply {
                                                 put(
