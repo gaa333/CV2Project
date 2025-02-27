@@ -159,21 +159,24 @@ fun DetailPerformanceReportScreen(
                         navController.popBackStack()
                     }
             )
-            Spacer(modifier = Modifier.weight(0.9f))
-            Text(
-                student?.name ?: name,  // ✅ Firebase에서 가져온 데이터가 있으면 사용
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold
-            )
-//            Icon(
-//                imageVector = Icons.Default.Share,
-//                contentDescription = "",
-//                modifier = Modifier
-//                    .padding(end = 15.dp)
-//                    .size(25.dp)
-//                    .clickable { }
-//            )
-            Spacer(modifier = Modifier.weight(1.1f))
+            Spacer(modifier = Modifier.weight(0.8f))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+//                    student?.name ?: name,  // ✅ Firebase에서 가져온 데이터가 있으면 사용
+                    "고쳐야됨",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Box(
+                    modifier = Modifier
+                        .height(2.dp)
+                        .width(150.dp)
+                        .background(Color(0xFFFF7800))
+                )
+            }
+            Spacer(modifier = Modifier.weight(1.2f))
         }
 
         Spacer(modifier = Modifier.height(10.dp))

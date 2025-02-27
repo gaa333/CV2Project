@@ -347,8 +347,10 @@ fun InputPopup(
     ) {
         Column(
             modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(8.dp))
-                .padding(16.dp),
+                .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
+                .padding(16.dp)
+                .widthIn(max = 350.dp)
+                .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -364,12 +366,8 @@ fun InputPopup(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    border = BorderStroke(0.01.dp, Color.Black),
-                    shape = RoundedCornerShape(15.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White
-                    ),
+                    border = BorderStroke(2.dp, Color(0xFF4786FF)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
                     modifier = Modifier
                         .width(100.dp)
                         .height(40.dp),
@@ -378,12 +376,8 @@ fun InputPopup(
                     Text("취소")
                 }
                 Button(
-                    border = BorderStroke(0.01.dp, Color.Black),
-                    shape = RoundedCornerShape(15.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White
-                    ),
+                    border = BorderStroke(2.dp, Color(0xFF4786FF)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
                     modifier = Modifier
                         .width(100.dp)
                         .height(40.dp),

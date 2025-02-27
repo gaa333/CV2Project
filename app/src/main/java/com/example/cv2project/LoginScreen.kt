@@ -1,5 +1,6 @@
 package com.example.cv2project
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -32,16 +33,23 @@ fun LoginScreen(navController: NavController, authManager: AuthManager) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
-            .padding(16.dp),
+            .background(Color.Black),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Image(
             painter = painterResource(id = R.drawable.nextgoal1),
             contentDescription = "로그인 앱 로고",
-            modifier = Modifier.size(300.dp)
+            modifier = Modifier.padding(horizontal = 30.dp)
         )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            "로그인", style = MaterialTheme.typography.headlineMedium,
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -93,18 +101,25 @@ fun LoginScreen(navController: NavController, authManager: AuthManager) {
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp),
+            border = BorderStroke(2.dp, Color(0xFF4786FF)),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
         ) {
-            Text("로그인")
+            Text("로그인", color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(
-            onClick = { navController.navigate("signup") }, // 회원가입 화면 이동
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("회원가입")
+            onClick = { navController.navigate("signup") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp),
+            border = BorderStroke(2.dp, Color(0xFF4786FF)),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)         ) {
+            Text("회원가입", color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -122,9 +137,13 @@ fun LoginScreen(navController: NavController, authManager: AuthManager) {
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp),
+            border = BorderStroke(2.dp, Color(0xFF4786FF)),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
         ) {
-            Text("익명으로 로그인")
+            Text("익명으로 로그인", color = Color.White)
         }
     }
 }

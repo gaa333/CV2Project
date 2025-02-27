@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -126,7 +127,7 @@ fun ScheduleScreen(navController: NavController) {
             Spacer(modifier = Modifier.weight(0.8f))
             Image(
                 painter = painterResource(id = R.drawable.schedule1),
-                contentDescription = "알림장",
+                contentDescription = "일정표",
                 modifier = Modifier.size(150.dp)
             )
             Spacer(modifier = Modifier.weight(1.2f))
@@ -148,7 +149,7 @@ fun ScheduleScreen(navController: NavController) {
         Button(
             onClick = { showDialog = true },
             modifier = Modifier.padding(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
         ) {
             Text("일정 추가", color = Color.White)
         }
@@ -156,7 +157,7 @@ fun ScheduleScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 현재 선택된 날짜 표시
-        Text(selectedDate, fontSize = 24.sp)
+        Text("📅 $selectedDate", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
         // 일정 목록
         LazyColumn(
@@ -243,7 +244,7 @@ fun AddScheduleDialog(
                 ) {
                     Text(
                         "시간 선택: ${if (time.isEmpty()) "선택 안 됨" else formatTime(time)}",
-                        color = Color.White // 글씨 색상 변경
+                        color = Color.White
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))

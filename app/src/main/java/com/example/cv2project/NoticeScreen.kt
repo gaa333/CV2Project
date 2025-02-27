@@ -34,6 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -144,7 +145,8 @@ fun NoticeScreen(navController: NavController, noticeDb: NoticeDatabase) {
                                             "&studentName=${notice.studentName}" +
                                             "&date=${notice.date}"
                                 )
-                            }
+                            },
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE0E0E0))
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("📅 ${notice.date}")
@@ -210,7 +212,7 @@ fun AddNoticeScreen(
                         navController.popBackStack()
                     }
             )
-            Spacer(modifier = Modifier.weight(0.9f)) // 중앙 정렬을 위한 Spacer
+            Spacer(modifier = Modifier.weight(0.9f))
             Image(
                 painter = painterResource(id = R.drawable.notice2),
                 contentDescription = "알림장 작성",
@@ -318,8 +320,8 @@ fun AddNoticeScreen(
             },
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = 30.dp),
-            border = BorderStroke(2.dp, Color(0xFF4786FF)), // 아웃라인 색을 #4786FF로 설정
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black) // 텍스트 색은 검정색으로 설정
+            border = BorderStroke(2.dp, Color(0xFF4786FF)),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
         ) {
             Text("알림장 추가")
         }

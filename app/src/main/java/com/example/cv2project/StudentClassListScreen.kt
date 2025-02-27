@@ -273,10 +273,6 @@ fun StudentManagementScreen(
             painter = painterResource(id = R.drawable.profile6),
             contentDescription = "메시"
         )
-        Image(
-            painter = painterResource(id = R.drawable.profile7),
-            contentDescription = "네이마르"
-        )
     }
 
 
