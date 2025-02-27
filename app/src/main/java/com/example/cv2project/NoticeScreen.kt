@@ -183,6 +183,8 @@ fun AddNoticeScreen(
     var selectedTab by remember { mutableStateOf("지금전송") }
     val tabs = listOf("지금전송", "임시저장", "예약전송")
 
+    var showDialog by remember { mutableStateOf(false) }
+
     // Firebase에서 전체 학생 목록 불러오기
     LaunchedEffect(Unit) {
         studentDb.loadAllStudents { loadedStudents ->
@@ -251,37 +253,87 @@ fun AddNoticeScreen(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
         // 학생 선택
         Text(
-            text = "학생 선택",
+            text = selectedStudent?.name ?: "학생 선택하기",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable {
+                    showDialog = true
+                }
         )
 
-        Spacer(modifier = Modifier.height(5.dp))
-        students.forEach { student ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { selectedStudent = student }
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = student.name,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-                if (selectedStudent == student) {
-                    Text("✔️")
+        // 학생 선택 다이얼로그
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = {
+                    Text(
+                        "학생 선택",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        students.forEach { student ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selectedStudent = student
+                                        showDialog = false // 선택 후 다이얼로그 닫기
+                                    }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = student.name,
+                                    modifier = Modifier.weight(1f),
+                                    textAlign = TextAlign.Center
+                                )
+                                if (selectedStudent == student) {
+                                    Text("✔️")
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { showDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
+                    ) {
+                        Text("닫기", color = Color.White)
+                    }
                 }
-            }
+            )
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(5.dp))
+//        students.forEach { student ->
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .clickable { selectedStudent = student }
+//                    .padding(8.dp),
+//                horizontalArrangement = Arrangement.Center,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Text(
+//                    text = student.name,
+//                    modifier = Modifier.weight(1f),
+//                    textAlign = TextAlign.Center
+//                )
+//                if (selectedStudent == student) {
+//                    Text("✔️")
+//                }
+//            }
+//        }
+        Spacer(modifier = Modifier.height(40.dp))
 
         // 알림 제목 입력
         OutlinedTextField(
@@ -291,7 +343,7 @@ fun AddNoticeScreen(
             modifier = Modifier
                 .width(300.dp)
         )
-        Spacer(modifier = Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         // 알림 내용 입력
         OutlinedTextField(
             value = content,
@@ -299,9 +351,9 @@ fun AddNoticeScreen(
             label = { Text("알림장 내용") },
             modifier = Modifier
                 .width(300.dp)
-                .height(280.dp)
+                .height(300.dp)
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         OutlinedButton(
             onClick = {
