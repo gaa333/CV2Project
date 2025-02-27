@@ -127,12 +127,18 @@ fun DetailPerformanceReportScreen(
     name: String,
     age: Int
 ) {
-    var student by remember { mutableStateOf<Student?>(null) }
+    var displayName by remember { mutableStateOf(name) }
 
-    // ✅ Firebase에서 학생 정보 가져오기
+    // Firebase에서 학생 정보 가져오기
     LaunchedEffect(id) {
         StudentDatabase().getStudentById(id) { fetchedStudent ->
-            student = fetchedStudent
+            // 만약 fetchedStudent가 null이 아니고, name이 비어있지 않다면 업데이트
+            if (fetchedStudent != null && fetchedStudent.name.isNotBlank()) {
+                displayName = fetchedStudent.name
+            } else {
+                // 다른 사용자의 데이터가 올바르게 로드되지 않으면, 초기 값(name)을 그대로 유지
+                displayName = name
+            }
         }
     }
 
@@ -165,14 +171,14 @@ fun DetailPerformanceReportScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    student?.name ?: name,
+                    displayName,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Box(
                     modifier = Modifier
                         .height(2.dp)
-                        .width(150.dp)
+                        .width(200.dp)
                         .background(Color(0xFFFF7800))
                 )
             }
