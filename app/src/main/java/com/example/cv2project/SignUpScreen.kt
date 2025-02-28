@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -111,6 +112,7 @@ fun SignUpScreen(navController: NavController, authManager: AuthManager) {
             value = password,
             onValueChange = { password = it },
             label = { Text("비밀번호(6자리 이상 입력)", color = Color.White) },
+            visualTransformation = PasswordVisualTransformation(), // 입력값이 *로 표시됨
             textStyle = TextStyle(color = Color.White),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Green,
@@ -125,6 +127,7 @@ fun SignUpScreen(navController: NavController, authManager: AuthManager) {
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             label = { Text("비밀번호 확인", color = Color.White) },
+            visualTransformation = PasswordVisualTransformation(), // 입력값이 *로 표시됨
             textStyle = TextStyle(color = Color.White),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Green,

@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.cv2project.auth.AuthManager
@@ -74,6 +75,7 @@ fun LoginScreen(navController: NavController, authManager: AuthManager) {
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
             ),
+            visualTransformation = PasswordVisualTransformation(), // 입력값이 *로 표시됨
             textStyle = TextStyle(color = Color.White),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Green,
