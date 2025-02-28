@@ -1,6 +1,6 @@
 package com.example.cv2project
 
-import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,12 +10,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
@@ -27,7 +27,8 @@ import com.example.cv2project.models.Student
  * Navigation 그래프에서 route를 "studentClassList"로 등록하여 사용
  */
 @Composable
-fun StudentClassListScreen(navController: NavController) {
+fun StudentClassListScreen(navController: NavController, userRole: String) {
+    val context = LocalContext.current
     var classList by remember { mutableStateOf(listOf("6세반", "7세반")) }
     var isAddingClass by remember { mutableStateOf(false) }
     var newClassName by remember { mutableStateOf("") }
@@ -72,7 +73,13 @@ fun StudentClassListScreen(navController: NavController) {
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(30.dp)
-                    .clickable { isAddingClass = true }
+                    .clickable {
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            isAddingClass = true
+                        }
+                    }
             )
         }
 
@@ -164,8 +171,10 @@ fun StudentClassListScreen(navController: NavController) {
 fun StudentManagementScreen(
     navController: NavController,
     studentDb: StudentDatabase,
-    selectedClassName: String
+    selectedClassName: String,
+    userRole: String
 ) {
+    val context = LocalContext.current
     var students by remember { mutableStateOf<List<Student>>(emptyList()) }
     var isAddingStudent by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
@@ -213,7 +222,13 @@ fun StudentManagementScreen(
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(25.dp)
-                    .clickable { isAddingStudent = true }
+                    .clickable {
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            isAddingStudent = true
+                        }
+                    }
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -363,7 +378,12 @@ fun StudentManagementScreen(
 }
 
 @Composable
-fun StudentDetailScreen(navController: NavController, studentName: String, studentAge: Int) {
+fun StudentDetailScreen(
+    navController: NavController,
+    studentName: String,
+    studentAge: Int,
+    userRole: String
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()

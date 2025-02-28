@@ -9,7 +9,8 @@ import kotlinx.coroutines.tasks.await
 data class User(
     val id: String = "",
     val name: String = "",
-    val email: String = ""
+    val email: String = "",
+    val role: String = ""
 )
 
 class AuthManager {
@@ -48,7 +49,7 @@ class AuthManager {
             }
     }
     // 🔹 회원가입 (이메일 & 비밀번호) + Firebase Database에 정보 저장
-    suspend fun signUp(name: String, email: String, password: String): Boolean {
+    suspend fun signUp(name: String, email: String, password: String, role: String): Boolean {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             val userId = result.user?.uid
@@ -57,7 +58,8 @@ class AuthManager {
                 val user = User(
                     id = userId,
                     name = name,
-                    email = email
+                    email = email,
+                    role = role
                 )
                 database.child(userId).setValue(user).await()
                 true
@@ -81,6 +83,19 @@ class AuthManager {
         }
     }
 
+    fun getCurrentUserRole(onResult: (String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(null)
+
+        database.child(userId).child("role").get()
+            .addOnSuccessListener { snapshot ->
+                onResult(snapshot.value as? String) // ✅ 역할(role) 반환
+            }
+            .addOnFailureListener {
+                onResult(null)
+            }
+    }
+
+
     // 🔹 익명 로그인 (자동 로그인을 방지하기 위해 "anonymous" 그룹에 저장 가능)
     fun signInAnonymously(onResult: (Boolean, String?) -> Unit) {
         auth.signInAnonymously()
@@ -88,7 +103,10 @@ class AuthManager {
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid
                     if (userId != null) {
-                        database.child("anonymous").child(userId).setValue(true)
+                        val userData = mapOf(
+                            "role" to "게스트"
+                        )
+                        database.child("users").child(userId).setValue(userData)
                     }
                     onResult(true, null)
                 } else {

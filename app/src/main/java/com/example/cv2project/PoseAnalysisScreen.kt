@@ -100,7 +100,7 @@ import java.util.concurrent.TimeUnit
 
 // Pose Analysis
 @Composable
-fun PoseAnalysisScreen(navController: androidx.navigation.NavController) {
+fun PoseAnalysisScreen(navController: NavController, userRole: String) {
     val context = LocalContext.current
     // Compose ViewModel 사용 (기존 by viewModels() 대신)
     val viewModel: PoseAnalysisViewModel = viewModel()
@@ -749,7 +749,8 @@ fun PoseReportScreen(
     ankleAngle: Double,
     hipScore: Double,
     kneeScore: Double,
-    ankleScore: Double
+    ankleScore: Double,
+    userRole: String
 ) {
     val context = LocalContext.current
     var videoUri by remember { mutableStateOf<Uri?>(null) }

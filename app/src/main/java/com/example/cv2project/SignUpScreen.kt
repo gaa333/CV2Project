@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -28,7 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.cv2project.auth.AuthManager
 import kotlinx.coroutines.launch
@@ -41,6 +47,9 @@ fun SignUpScreen(navController: NavController, authManager: AuthManager) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val roles = listOf("관리자", "학부모", "학생", "게스트")
+    var selectedRole by remember { mutableStateOf("guest") }
+    var expanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -117,6 +126,41 @@ fun SignUpScreen(navController: NavController, authManager: AuthManager) {
             modifier = Modifier.width(330.dp)
         )
 
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            "회원 유형 선택", fontSize = 18.sp, color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Box {
+            OutlinedButton(
+                onClick = { expanded = true },
+                border = BorderStroke(1.dp, Color.White),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                modifier = Modifier.width(120.dp)
+            ) {
+                Text(selectedRole, color = Color.White)
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(Color.White)
+            ) {
+                roles.forEach { role ->
+                    DropdownMenuItem(
+                        text = { Text(role) },
+                        onClick = {
+                            selectedRole = role
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(20.dp))
 
         errorMessage?.let {
@@ -128,7 +172,7 @@ fun SignUpScreen(navController: NavController, authManager: AuthManager) {
             onClick = {
                 if (password == confirmPassword) {
                     coroutineScope.launch {
-                        val user = authManager.signUp(name, email, password)
+                        val user = authManager.signUp(name, email, password, selectedRole)
                         if (user != null) {
                             navController.popBackStack()
                         } else {

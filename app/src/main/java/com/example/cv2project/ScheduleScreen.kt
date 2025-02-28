@@ -3,16 +3,14 @@ package com.example.cv2project
 import android.app.TimePickerDialog
 import android.content.Context
 import android.widget.CalendarView
+import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -63,7 +61,7 @@ fun formatTime(time: String): String {
  * 네비게이션에서 route를 "schedule"로 등록해서 사용
  */
 @Composable
-fun ScheduleScreen(navController: NavController) {
+fun ScheduleScreen(navController: NavController, userRole: String) {
     val context = LocalContext.current
     var selectedDate by remember { mutableStateOf(getTodaysDate()) }
     val scheduleData = remember { mutableStateListOf<Schedule>() }
@@ -147,7 +145,13 @@ fun ScheduleScreen(navController: NavController) {
 
         // 일정 추가 버튼
         Button(
-            onClick = { showDialog = true },
+            onClick = {
+                if (userRole != "admin") {
+                    Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    showDialog = true
+                }
+            },
             modifier = Modifier.padding(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
         ) {

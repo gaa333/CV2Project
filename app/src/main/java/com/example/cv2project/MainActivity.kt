@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
@@ -42,6 +41,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.Text
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.navigation.NavHostController
@@ -57,6 +59,7 @@ import com.example.cv2project.firebase.StudentDatabase
 import com.example.cv2project.models.Announcement
 import com.example.cv2project.models.Notice
 import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +81,22 @@ fun MyApp() {
     val studentDb = remember { StudentDatabase() }
     val authManager = remember { AuthManager() }
 
+    var userRole by remember { mutableStateOf("게스트") }
+    val auth = FirebaseAuth.getInstance()
+
+    // 인증 상태 변경 리스너 등록
+    DisposableEffect(auth) {
+        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            // 인증 상태가 변경되면 getCurrentUserRole 호출
+            authManager.getCurrentUserRole { role ->
+                userRole = role ?: "게스트"
+            }
+        }
+        auth.addAuthStateListener(authStateListener)
+        onDispose {
+            auth.removeAuthStateListener(authStateListener)
+        }
+    }
     AnimatedNavHost(
         navController = navController,
         startDestination = "splash",
@@ -89,16 +108,16 @@ fun MyApp() {
         composable("splash") { SplashScreen(navController, authManager) }
         composable("login") { LoginScreen(navController, authManager) }
         composable("signup") { SignUpScreen(navController, authManager) }
-        composable("main") { MainScreen(navController, authManager) }
-        composable("poseAnalysis") { PoseAnalysisScreen(navController) }
-        composable("notice") { NoticeScreen(navController, noticeDb) }
-        composable("announcement") { AnnouncementScreen(navController, announcementDb) }
-        composable("schedule") { ScheduleScreen(navController) }
+        composable("main") { MainScreen(navController, authManager, userRole) }
+        composable("poseAnalysis") { PoseAnalysisScreen(navController, userRole) }
+        composable("notice") { NoticeScreen(navController, noticeDb, userRole) }
+        composable("announcement") { AnnouncementScreen(navController, announcementDb, userRole) }
+        composable("schedule") { ScheduleScreen(navController, userRole) }
         composable("pickupService") { PickupServiceScreen(navController) }
         composable("payment") { PaymentScreen(navController) }
-        composable("studentClassList") { StudentClassListScreen(navController) }
-        composable("performanceReport") { PerformanceReportScreen(navController, studentDb) }
-        composable("addNotice") { AddNoticeScreen(navController, studentDb, noticeDb) }
+        composable("studentClassList") { StudentClassListScreen(navController, userRole) }
+        composable("performanceReport") { PerformanceReportScreen(navController, studentDb, userRole) }
+        composable("addNotice") { AddNoticeScreen(navController, studentDb, noticeDb, userRole) }
 
         // Detail Notice Screen
         composable(
@@ -118,11 +137,11 @@ fun MyApp() {
             val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
 
             val notice = Notice(id, title, content, studentName, date)
-            DetailNoticeScreen(navController, notice, noticeDb, authManager)
+            DetailNoticeScreen(navController, notice, noticeDb, authManager, userRole)
         }
 
         // Add Announcement Screen
-        composable("addAnnouncement") { AddAnnouncementScreen(navController, announcementDb) }
+        composable("addAnnouncement") { AddAnnouncementScreen(navController, announcementDb, userRole) }
 
         // Detail Announcement Screen
         composable(
@@ -140,7 +159,7 @@ fun MyApp() {
             val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
             val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
             val announcement = Announcement(id, title, content, date)
-            DetailAnnouncementScreen(navController, announcement, announcementDb)
+            DetailAnnouncementScreen(navController, announcement, announcementDb, userRole)
         }
 
         // Student Management Screen
@@ -151,7 +170,7 @@ fun MyApp() {
             )
         ) { backStackEntry ->
             val className = backStackEntry.arguments?.getString("className") ?: "반 이름 없음"
-            StudentManagementScreen(navController, studentDb, className)
+            StudentManagementScreen(navController, studentDb, className, userRole)
         }
 
         // Student Detail Screen
@@ -165,7 +184,7 @@ fun MyApp() {
             val studentName = backStackEntry.arguments?.getString("studentName") ?: "이름 없음"
             val studentAge = backStackEntry.arguments?.getInt("studentAge") ?: 0
 
-            StudentDetailScreen(navController, studentName, studentAge)
+            StudentDetailScreen(navController, studentName, studentAge, userRole)
         }
 
         // Pose Report Screen
@@ -197,7 +216,8 @@ fun MyApp() {
                 ankleAngle,
                 hipScore,
                 kneeScore,
-                ankleScore
+                ankleScore,
+                userRole
             )
         }
 
@@ -214,13 +234,13 @@ fun MyApp() {
             val name = backStackEntry.arguments?.getString("name") ?: "Unknown"
             val age = backStackEntry.arguments?.getInt("age") ?: 0
 
-            DetailPerformanceReportScreen(navController, id, name, age)
+            DetailPerformanceReportScreen(navController, id, name, age, userRole)
         }
     }
 }
 
 @Composable
-fun MainScreen(navController: NavHostController, authManager: AuthManager) {
+fun MainScreen(navController: NavHostController, authManager: AuthManager, userRole: String) {
     Column(
         modifier = Modifier
             .padding(WindowInsets.statusBars.only(WindowInsetsSides.Top).asPaddingValues())

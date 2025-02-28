@@ -1,12 +1,7 @@
 package com.example.cv2project
 
-import android.app.Activity
-import android.app.Activity.RESULT_OK
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,23 +21,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,8 +63,10 @@ import java.util.Locale
  * - route 예: "notice"
  */
 @Composable
-fun NoticeScreen(navController: NavController, noticeDb: NoticeDatabase) {
+fun NoticeScreen(navController: NavController, noticeDb: NoticeDatabase, userRole: String) {
+    val context = LocalContext.current
     var notices by remember { mutableStateOf<List<Notice>>(emptyList()) }
+
 
     LaunchedEffect(Unit) {
         noticeDb.getNotices { fetchedNotices ->
@@ -121,7 +112,11 @@ fun NoticeScreen(navController: NavController, noticeDb: NoticeDatabase) {
                     .padding(end = 15.dp)
                     .size(30.dp)
                     .clickable {
-                        navController.navigate("addNotice")
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            navController.navigate("addNotice")
+                        }
                     }
             )
         }
@@ -173,7 +168,8 @@ fun NoticeScreen(navController: NavController, noticeDb: NoticeDatabase) {
 fun AddNoticeScreen(
     navController: NavController,
     studentDb: StudentDatabase,
-    noticeDb: NoticeDatabase
+    noticeDb: NoticeDatabase,
+    userRole: String
 ) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
@@ -313,27 +309,7 @@ fun AddNoticeScreen(
                 }
             )
         }
-        Spacer(modifier = Modifier.height(5.dp))
-//        students.forEach { student ->
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .clickable { selectedStudent = student }
-//                    .padding(8.dp),
-//                horizontalArrangement = Arrangement.Center,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Text(
-//                    text = student.name,
-//                    modifier = Modifier.weight(1f),
-//                    textAlign = TextAlign.Center
-//                )
-//                if (selectedStudent == student) {
-//                    Text("✔️")
-//                }
-//            }
-//        }
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(45.dp))
 
         // 알림 제목 입력
         OutlinedTextField(
@@ -391,8 +367,10 @@ fun DetailNoticeScreen(
     navController: NavController,
     notice: Notice,
     noticeDb: NoticeDatabase,
-    authManager: AuthManager
+    authManager: AuthManager,
+    userRole: String
 ) {
+    val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     var showCommentDialog by remember { mutableStateOf(false) }
     var comments by remember { mutableStateOf<List<Comment>>(emptyList()) }
@@ -451,7 +429,13 @@ fun DetailNoticeScreen(
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(30.dp)
-                    .clickable { showDialog = true }
+                    .clickable {
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            showDialog = true
+                        }
+                    }
             )
         }
 

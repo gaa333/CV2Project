@@ -1,5 +1,6 @@
 package com.example.cv2project
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -7,16 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,7 +37,12 @@ import java.util.Locale
  * 네비게이션에서 route를 "announcement"로 등록해서 사용
  */
 @Composable
-fun AnnouncementScreen(navController: NavController, announcementDb: AnnouncementDatabase) {
+fun AnnouncementScreen(
+    navController: NavController,
+    announcementDb: AnnouncementDatabase,
+    userRole: String
+) {
+    val context = LocalContext.current
     var announcements by remember { mutableStateOf<List<Announcement>>(emptyList()) }
 
     // Firebase에서 공지사항 가져오기
@@ -87,7 +88,13 @@ fun AnnouncementScreen(navController: NavController, announcementDb: Announcemen
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(30.dp)
-                    .clickable { navController.navigate("addAnnouncement") }
+                    .clickable {
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            navController.navigate("addAnnouncement")
+                        }
+                    }
             )
         }
 
@@ -141,7 +148,11 @@ fun AnnouncementScreen(navController: NavController, announcementDb: Announcemen
 }
 
 @Composable
-fun AddAnnouncementScreen(navController: NavController, announcementDb: AnnouncementDatabase) {
+fun AddAnnouncementScreen(
+    navController: NavController,
+    announcementDb: AnnouncementDatabase,
+    userRole: String
+) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     val currentDate by remember {
@@ -267,8 +278,10 @@ fun AddAnnouncementScreen(navController: NavController, announcementDb: Announce
 fun DetailAnnouncementScreen(
     navController: NavController,
     announcement: Announcement,
-    announcementDb: AnnouncementDatabase
+    announcementDb: AnnouncementDatabase,
+    userRole: String
 ) {
+    val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -306,7 +319,13 @@ fun DetailAnnouncementScreen(
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(25.dp)
-                    .clickable { showDialog = true }
+                    .clickable {
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            showDialog = true
+                        }
+                    }
             )
         }
 

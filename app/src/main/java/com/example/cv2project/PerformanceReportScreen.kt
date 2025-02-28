@@ -1,20 +1,15 @@
 package com.example.cv2project
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
@@ -28,7 +23,11 @@ import com.example.cv2project.models.Student
  */
 // 학생 목록
 @Composable
-fun PerformanceReportScreen(navController: NavController, studentDb: StudentDatabase) {
+fun PerformanceReportScreen(
+    navController: NavController,
+    studentDb: StudentDatabase,
+    userRole: String
+) {
     // 기존 Activity에서 studentPrefs를 받았으므로, 외부에서 DI 해주는 방식으로 변경
     var students by remember { mutableStateOf<List<Student>>(emptyList()) }
 
@@ -125,7 +124,8 @@ fun DetailPerformanceReportScreen(
     navController: NavController,
     id: String,  // ✅ 학생 ID 추가
     name: String,
-    age: Int
+    age: Int,
+    userRole: String
 ) {
     var displayName by remember { mutableStateOf(name) }
 
