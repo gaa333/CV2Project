@@ -123,26 +123,26 @@ fun LoginScreen(navController: NavController, authManager: AuthManager) {
         }
         Spacer(modifier = Modifier.height(10.dp))
 
-        // 익명 로그인 버튼 추가 ✅
-        Button(
-            onClick = {
-                authManager.signInAnonymously { success, error ->
-                    if (success) {
-                        navController.navigate("main") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    } else {
-                        errorMessage = "익명 로그인 실패: $error"
-                    }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp),
-            border = BorderStroke(2.dp, Color(0xFF4786FF)),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
-        ) {
-            Text("익명으로 로그인", color = Color.White)
-        }
+        // 익명 로그인 버튼
+//        Button(
+//            onClick = {
+//                authManager.signInAnonymously { success, error ->
+//                    if (success) {
+//                        navController.navigate("main") {
+//                            popUpTo("login") { inclusive = true }
+//                        }
+//                    } else {
+//                        errorMessage = "익명 로그인 실패: $error"
+//                    }
+//                }
+//            },
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 30.dp),
+//            border = BorderStroke(2.dp, Color(0xFF4786FF)),
+//            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
+//        ) {
+//            Text("익명으로 로그인", color = Color.White)
+//        }
     }
 }

@@ -48,6 +48,7 @@ class AuthManager {
                 onResult(null)
             }
     }
+
     // 🔹 회원가입 (이메일 & 비밀번호) + Firebase Database에 정보 저장
     suspend fun signUp(name: String, email: String, password: String, role: String): Boolean {
         return try {
