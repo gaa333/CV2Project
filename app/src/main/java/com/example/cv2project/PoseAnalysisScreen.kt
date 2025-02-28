@@ -200,7 +200,8 @@ fun PoseAnalysisContent(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "뒤로가기",
                     modifier = Modifier
-                        .size(25.dp)
+                        .size(50.dp)
+                        .padding(top = 15.dp)
                         .clickable { navController.popBackStack() },
                     tint = androidx.compose.ui.graphics.Color.White
                 )
@@ -771,7 +772,8 @@ fun PoseReportScreen(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "뒤로가기",
                 modifier = Modifier
-                    .size(25.dp)
+                    .size(50.dp)
+                    .padding(top = 15.dp)
                     .clickable { navController.popBackStack() },
                 tint = Color.White
             )
