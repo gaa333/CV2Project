@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <paths>
+        <cache-path
+            name="my_cache"
+            path="." />
+        <!-- 혹은 files-path, external-path 등 필요한 경로 추가 -->
+    </paths>
+</PreferenceScreen>
