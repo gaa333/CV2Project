@@ -483,26 +483,28 @@ fun DetailNoticeScreen(
                             Divider()
                             Spacer(modifier = Modifier.size(3.dp))
                         }
-                        Image(
-                            painter = painterResource(R.drawable.trash),
-                            contentDescription = "댓글 삭제",
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clickable {
-                                    Log.d(
-                                        "Firebase",
-                                        "🔥 댓글 삭제 버튼 클릭됨: commentId=${comment.id}"
-                                    ) // ✅ 삭제 전 로그
-                                    noticeDb.deleteComment(notice.id, comment.id) { success ->
-                                        if (success) {
-                                            // 🔥 Firebase에서 데이터 다시 가져와서 최신 상태 유지
-                                            noticeDb.getComments(notice.id) { updatedComments ->
-                                                comments = updatedComments
+                        if (userRole == "admin" || (userRole != "guest" && userName == comment.author)) {
+                            Image(
+                                painter = painterResource(R.drawable.trash),
+                                contentDescription = "댓글 삭제",
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clickable {
+                                        Log.d(
+                                            "Firebase",
+                                            "🔥 댓글 삭제 버튼 클릭됨: commentId=${comment.id}"
+                                        ) // ✅ 삭제 전 로그
+                                        noticeDb.deleteComment(notice.id, comment.id) { success ->
+                                            if (success) {
+                                                // 🔥 Firebase에서 데이터 다시 가져와서 최신 상태 유지
+                                                noticeDb.getComments(notice.id) { updatedComments ->
+                                                    comments = updatedComments
+                                                }
                                             }
                                         }
                                     }
-                                }
-                        )
+                            )
+                        }
                     }
                 }
             }
