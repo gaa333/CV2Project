@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.cv2project.ui.theme.CV2ProjectTheme
@@ -39,10 +38,18 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -51,12 +58,12 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cv2project.auth.AuthManager
 import com.example.cv2project.firebase.AnnouncementDatabase
+import com.example.cv2project.firebase.NoticeDatabase
+import com.example.cv2project.firebase.StudentDatabase
 import com.example.cv2project.models.Announcement
-import com.example.cv2project.preferences.CommentPreferences
-import com.example.cv2project.preferences.NoticePreferences
-import com.example.cv2project.preferences.StudentPreferences
+import com.example.cv2project.models.Notice
 import com.google.accompanist.navigation.animation.AnimatedNavHost
-
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,13 +80,35 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val studentPrefs = remember { StudentPreferences(context) }
-    val noticePrefs = remember { NoticePreferences(context) }
-    val commentPrefs = remember { CommentPreferences(context) }
+    val noticeDb = remember { NoticeDatabase() }
     val announcementDb = remember { AnnouncementDatabase() }
-
+    val studentDb = remember { StudentDatabase() }
     val authManager = remember { AuthManager() }
+    var userName by remember { mutableStateOf("알수없음") }
+    var userEmail by remember { mutableStateOf("알수없음") }
+    var userRole by remember { mutableStateOf("게스트") }
+    val auth = FirebaseAuth.getInstance()
+
+    // 인증 상태 변경 리스너 등록
+    DisposableEffect(auth) {
+        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            authManager.getCurrentUserInfo { user ->
+                if (user != null) {
+                    userName = user.name
+                    userEmail = user.email
+                    userRole = user.role
+                } else {
+                    userName = "Unknown"
+                    userEmail = "unknown@example.com"
+                    userRole = "게스트"
+                }
+            }
+        }
+        auth.addAuthStateListener(authStateListener)
+        onDispose {
+            auth.removeAuthStateListener(authStateListener)
+        }
+    }
 
     AnimatedNavHost(
         navController = navController,
@@ -92,50 +121,52 @@ fun MyApp() {
         composable("splash") { SplashScreen(navController, authManager) }
         composable("login") { LoginScreen(navController, authManager) }
         composable("signup") { SignUpScreen(navController, authManager) }
-        composable("main") { MainScreen(navController, authManager) }
-        composable("poseAnalysis") { PoseAnalysisScreen(navController) }
-        composable("notice") { NoticeScreen(navController) }
-        composable("announcement") { AnnouncementScreen(navController, announcementDb) }
-        composable("schedule") { ScheduleScreen(navController) }
+        composable("main") { MainScreen(navController, authManager, userRole, userName, userEmail) }
+        composable("poseAnalysis") { PoseAnalysisScreen(navController, userRole) }
+        composable("notice") { NoticeScreen(navController, noticeDb, userRole) }
+        composable("announcement") { AnnouncementScreen(navController, announcementDb, userRole) }
+        composable("schedule") { ScheduleScreen(navController, userRole) }
         composable("pickupService") { PickupServiceScreen(navController) }
         composable("payment") { PaymentScreen(navController) }
-        composable("studentClassList") { StudentClassListScreen(navController) }
-        composable("performanceReport") { PerformanceReportScreen(navController, studentPrefs) }
-        composable("addNotice") { AddNoticeScreen(navController, studentPrefs, noticePrefs) }
+        composable("studentClassList") { StudentClassListScreen(navController, userRole) }
+        composable("performanceReport") {
+            PerformanceReportScreen(
+                navController,
+                studentDb,
+                userRole
+            )
+        }
+        composable("addNotice") { AddNoticeScreen(navController, studentDb, noticeDb, userRole) }
 
         // Detail Notice Screen
         composable(
-            route = "detailNotice?title={title}&content={content}&studentName={studentName}&date={date}&noticeId={noticeId}",
+            route = "detailNotice?id={id}&title={title}&content={content}&studentName={studentName}&date={date}",
             arguments = listOf(
-                navArgument("title") { type = NavType.StringType; defaultValue = "제목 없음" },
-                navArgument("content") { type = NavType.StringType; defaultValue = "내용 없음" },
-                navArgument("studentName") { type = NavType.StringType; defaultValue = "이름 없음" },
-                navArgument("date") { type = NavType.StringType; defaultValue = "날짜 없음" },
-                navArgument("noticeId") { type = NavType.StringType; defaultValue = "noticeId" }
+                navArgument("id") { type = NavType.StringType },
+                navArgument("title") { type = NavType.StringType },
+                navArgument("content") { type = NavType.StringType },
+                navArgument("studentName") { type = NavType.StringType },
+                navArgument("date") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            // 인자(Arguments) 추출
+            val id = backStackEntry.arguments?.getString("id") ?: ""
             val title = backStackEntry.arguments?.getString("title") ?: "제목 없음"
             val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
             val studentName = backStackEntry.arguments?.getString("studentName") ?: "이름 없음"
             val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
-            val noticeId =
-                backStackEntry.arguments?.getString("noticeId") ?: "noticeId" // ✅ noticeId 추출
 
-            DetailNoticeScreen(
-                navController,
-                title = title,
-                content = content,
-                studentName = studentName,
-                date = date,
-                noticeId = noticeId,
-                commentPrefs = commentPrefs,
-                noticePrefs
-            )
+            val notice = Notice(id, title, content, studentName, date)
+            DetailNoticeScreen(navController, notice, noticeDb, authManager, userRole)
         }
 
         // Add Announcement Screen
-        composable("addAnnouncement") { AddAnnouncementScreen(navController, announcementDb) }
+        composable("addAnnouncement") {
+            AddAnnouncementScreen(
+                navController,
+                announcementDb,
+                userRole
+            )
+        }
 
         // Detail Announcement Screen
         composable(
@@ -153,7 +184,7 @@ fun MyApp() {
             val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
             val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
             val announcement = Announcement(id, title, content, date)
-            DetailAnnouncementScreen(navController, announcement, announcementDb)
+            DetailAnnouncementScreen(navController, announcement, announcementDb, userRole)
         }
 
         // Student Management Screen
@@ -164,7 +195,7 @@ fun MyApp() {
             )
         ) { backStackEntry ->
             val className = backStackEntry.arguments?.getString("className") ?: "반 이름 없음"
-            StudentManagementScreen(navController, studentPrefs, className)
+            StudentManagementScreen(navController, studentDb, className, userRole)
         }
 
         // Student Detail Screen
@@ -178,7 +209,7 @@ fun MyApp() {
             val studentName = backStackEntry.arguments?.getString("studentName") ?: "이름 없음"
             val studentAge = backStackEntry.arguments?.getInt("studentAge") ?: 0
 
-            StudentDetailScreen(navController, studentName, studentAge)
+            StudentDetailScreen(navController, studentName, studentAge, userRole)
         }
 
         // Pose Report Screen
@@ -210,28 +241,39 @@ fun MyApp() {
                 ankleAngle,
                 hipScore,
                 kneeScore,
-                ankleScore
+                ankleScore,
+                userRole
             )
         }
 
         // Detail Performance Report Screen
         composable(
-            "detailPerformanceReport?name={name}&age={age}",
+            "detailPerformanceReport?id={id}&name={name}&age={age}",
             arguments = listOf(
+                navArgument("id") { type = NavType.StringType; defaultValue = "" }, // ✅ id 추가
                 navArgument("name") { type = NavType.StringType; defaultValue = "Unknown" },
                 navArgument("age") { type = NavType.IntType; defaultValue = 0 }
             )
         ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
             val name = backStackEntry.arguments?.getString("name") ?: "Unknown"
             val age = backStackEntry.arguments?.getInt("age") ?: 0
 
-            DetailPerformanceReportScreen(navController, name, age)
+            DetailPerformanceReportScreen(navController, id, name, age, userRole)
         }
     }
 }
 
 @Composable
-fun MainScreen(navController: NavHostController, authManager: AuthManager) {
+fun MainScreen(
+    navController: NavHostController,
+    authManager: AuthManager,
+    userRole: String,
+    userName: String,
+    userEmail: String
+) {
+    var showUserDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .padding(WindowInsets.statusBars.only(WindowInsetsSides.Top).asPaddingValues())
@@ -245,10 +287,11 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager) {
                 contentDescription = "앱로고"
             )
             Image(
-                painter = painterResource(R.drawable.red),
+                painter = painterResource(R.drawable.logout),
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
+                    .offset(x = 18.dp, y = 20.dp)
                     .clickable {
                         authManager.logout()
                         navController.navigate("login") {
@@ -256,8 +299,17 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager) {
                         }
                     }
             )
+            Image(
+                painter = painterResource(R.drawable.user),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .offset(x = 300.dp, y = 20.dp)
+                    .clickable { showUserDialog = true }
+            )
+
         }
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -312,6 +364,29 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager) {
             }
             Spacer(modifier = Modifier.weight(0.1f))
         }
+    }
+    if (showUserDialog) {
+        AlertDialog(
+            onDismissRequest = { showUserDialog = false },
+            title = { Text("사용자 정보", fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text("Name: $userName", fontSize = 17.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text("Email: $userEmail", fontSize = 17.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text("Role: $userRole", fontSize = 17.sp)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showUserDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
+                ) {
+                    Text("확인", color = Color.White)
+                }
+            }
+        )
     }
 }
 

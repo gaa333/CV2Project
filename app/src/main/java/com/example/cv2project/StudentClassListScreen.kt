@@ -1,6 +1,6 @@
 package com.example.cv2project
 
-import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,56 +10,61 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
-import com.example.cv2project.preferences.Student
-import com.example.cv2project.preferences.StudentPreferences
+import com.example.cv2project.firebase.StudentDatabase
+import com.example.cv2project.models.Student
 
 /**
  * 반 목록 화면 Composable
  * Navigation 그래프에서 route를 "studentClassList"로 등록하여 사용
  */
 @Composable
-fun StudentClassListScreen(navController: NavController) {
+fun StudentClassListScreen(navController: NavController, userRole: String) {
+    val context = LocalContext.current
     var classList by remember { mutableStateOf(listOf("6세반", "7세반")) }
     var isAddingClass by remember { mutableStateOf(false) }
     var newClassName by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 상단 바
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // 뒤로가기 버튼
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable {
-                        // 네비게이션으로 뒤로가기
                         navController.popBackStack()
-                    },
-                tint = Color.White
+                    }
             )
 
-            Text(text = "반 목록", fontSize = 25.sp, color = Color.White)
+            Image(
+                painter = painterResource(id = R.drawable.student7),
+                contentDescription = "반 목록",
+                modifier = Modifier.size(150.dp)
+            )
 
             // 새 반 추가 버튼
             Icon(
@@ -68,8 +73,13 @@ fun StudentClassListScreen(navController: NavController) {
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(30.dp)
-                    .clickable { isAddingClass = true },
-                tint = Color.White
+                    .clickable {
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            isAddingClass = true
+                        }
+                    }
             )
         }
 
@@ -127,7 +137,7 @@ fun StudentClassListScreen(navController: NavController) {
                                 newClassName = "${newClassName}세반"
                             }
                         },
-                        label = { Text("숫자 입력") }
+                        label = { Text("반 이름") }
                     )
                 },
                 confirmButton = {
@@ -138,14 +148,18 @@ fun StudentClassListScreen(navController: NavController) {
                                 newClassName = ""
                                 isAddingClass = false
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
                     ) {
-                        Text("추가")
+                        Text("추가", color = Color.White)
                     }
                 },
                 dismissButton = {
-                    Button(onClick = { isAddingClass = false }) {
-                        Text("취소")
+                    Button(
+                        onClick = { isAddingClass = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
+                    ) {
+                        Text("취소", color = Color.White)
                     }
                 }
             )
@@ -156,40 +170,51 @@ fun StudentClassListScreen(navController: NavController) {
 @Composable
 fun StudentManagementScreen(
     navController: NavController,
-    studentPrefs: StudentPreferences,
-    selectedClassName: String
+    studentDb: StudentDatabase,
+    selectedClassName: String,
+    userRole: String
 ) {
-    var students by remember { mutableStateOf(studentPrefs.loadStudents(selectedClassName)) }
+    val context = LocalContext.current
+    var students by remember { mutableStateOf<List<Student>>(emptyList()) }
     var isAddingStudent by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
 
+    // Firebase에서 학생 목록 불러오기
+    LaunchedEffect(Unit) {
+        studentDb.loadStudents(selectedClassName) { loadedStudents ->
+            students = loadedStudents
+        }
+    }
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
-                    .clickable { navController.popBackStack() }, // ✅ 뒤로가기 처리
-                tint = Color.White
+                    .clickable {
+                        navController.popBackStack()
+                    }
             )
-            Text(
-                text = "학생 프로필",
-                color = Color.White,
-                fontSize = 25.sp,
-                modifier = Modifier.align(Alignment.CenterVertically)
+            Image(
+                painter = painterResource(id = R.drawable.student8),
+                contentDescription = "학생 프로필 목록",
+                modifier = Modifier.size(150.dp)
             )
             Icon(
                 imageVector = Icons.Default.Edit,
@@ -197,12 +222,40 @@ fun StudentManagementScreen(
                 modifier = Modifier
                     .padding(end = 15.dp)
                     .size(25.dp)
-                    .clickable { isAddingStudent = true }, // 학생 추가 다이얼로그 활성화
-                tint = Color.White
+                    .clickable {
+                        if (userRole != "admin") {
+                            Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            isAddingStudent = true
+                        }
+                    }
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
 
+//        Column(
+//            modifier = Modifier
+//                .padding(10.dp)
+//                .fillMaxSize()
+//                .verticalScroll(rememberScrollState())
+//                .padding(bottom = 20.dp)
+//        ) {
+//            Spacer(modifier = Modifier.height(20.dp))
+//            // 학생 리스트 출력
+//            students.forEach { student ->
+//                StudentCard(student = student) { selectedStudent ->
+//                    navController.navigate("studentDetail?studentName=음바페")
+//                }
+//                Spacer(modifier = Modifier.height(10.dp))
+//            }
+//        }
+
+        Image(
+            painter = painterResource(id = R.drawable.profile2),
+            contentDescription = "검색",
+            modifier = Modifier.padding(start = 5.dp, end = 5.dp)
+        )
+        Spacer(modifier = Modifier.height(15.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -210,13 +263,6 @@ fun StudentManagementScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.profile2),
-                contentDescription = "검색",
-                modifier = Modifier.padding(start = 5.dp, end = 5.dp)
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-
             // ✅ 네비게이션을 사용하여 학생 상세 정보 화면으로 이동
             Image(
                 painter = painterResource(id = R.drawable.profile3),
@@ -287,25 +333,43 @@ fun StudentManagementScreen(
                             name = ""
                             age = ""
                             isAddingStudent = false
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
                     ) {
-                        Text("취소")
+                        Text("취소", color = Color.White)
                     }
 
                     Button(
                         onClick = {
                             if (name.isNotEmpty() && age.isNotEmpty()) {
-                                val updatedStudents = students.toMutableList()
-                                updatedStudents.add(Student(name, age.toInt()))
-                                studentPrefs.saveStudents(selectedClassName, updatedStudents)
-                                students = updatedStudents
-                                name = ""
-                                age = ""
-                                isAddingStudent = false
+                                val newStudent = Student(
+                                    id = studentDb.generateStudentId(),
+                                    name = name,
+                                    age = age.toInt()
+                                )
+
+                                // ✅ 기존 학생 목록 가져오기 & 새 학생 추가
+                                studentDb.loadStudents(selectedClassName) { existingStudents ->
+                                    val updatedStudents = existingStudents + newStudent
+
+                                    // ✅ Firebase에 저장
+                                    studentDb.saveStudents(
+                                        selectedClassName,
+                                        updatedStudents
+                                    ) { success ->
+                                        if (success) {
+                                            students = updatedStudents // ✅ UI 업데이트
+                                            name = ""
+                                            age = ""
+                                            isAddingStudent = false
+                                        }
+                                    }
+                                }
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
                     ) {
-                        Text("저장")
+                        Text("저장", color = Color.White)
                     }
                 }
             }
@@ -314,7 +378,12 @@ fun StudentManagementScreen(
 }
 
 @Composable
-fun StudentDetailScreen(navController: NavController, studentName: String, studentAge: Int) {
+fun StudentDetailScreen(
+    navController: NavController,
+    studentName: String,
+    studentAge: Int,
+    userRole: String
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()

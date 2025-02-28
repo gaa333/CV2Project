@@ -3,21 +3,22 @@ package com.example.cv2project
 import android.app.TimePickerDialog
 import android.content.Context
 import android.widget.CalendarView
-import androidx.compose.foundation.background
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -60,7 +61,7 @@ fun formatTime(time: String): String {
  * 네비게이션에서 route를 "schedule"로 등록해서 사용
  */
 @Composable
-fun ScheduleScreen(navController: NavController) {
+fun ScheduleScreen(navController: NavController, userRole: String) {
     val context = LocalContext.current
     var selectedDate by remember { mutableStateOf(getTodaysDate()) }
     val scheduleData = remember { mutableStateListOf<Schedule>() }
@@ -98,47 +99,36 @@ fun ScheduleScreen(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 상단 바
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .background(color = Color.Black),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // 뒤로가기 버튼
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
+            Image(
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = "뒤로가기",
                 modifier = Modifier
                     .padding(start = 15.dp)
                     .size(25.dp)
                     .clickable {
-                        // Activity 종료 대신 Navigation으로 뒤로가기
                         navController.popBackStack()
-                    },
-                tint = Color.White
+                    }
             )
-
-            Text(
-                text = "일정표",
-                fontSize = 25.sp,
-                color = Color.White
+            Spacer(modifier = Modifier.weight(0.8f))
+            Image(
+                painter = painterResource(id = R.drawable.schedule1),
+                contentDescription = "일정표",
+                modifier = Modifier.size(150.dp)
             )
-
-            // 공유 버튼 (현재는 동작 없음)
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "공유",
-                modifier = Modifier
-                    .padding(end = 15.dp)
-                    .size(25.dp),
-                tint = Color.White
-            )
+            Spacer(modifier = Modifier.weight(1.2f))
         }
 
         // 달력 (CalendarView)
@@ -155,9 +145,15 @@ fun ScheduleScreen(navController: NavController) {
 
         // 일정 추가 버튼
         Button(
-            onClick = { showDialog = true },
+            onClick = {
+                if (userRole != "admin") {
+                    Toast.makeText(context, "관리자만 이용 가능한 기능입니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    showDialog = true
+                }
+            },
             modifier = Modifier.padding(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
         ) {
             Text("일정 추가", color = Color.White)
         }
@@ -165,7 +161,7 @@ fun ScheduleScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 현재 선택된 날짜 표시
-        Text(selectedDate, fontSize = 24.sp)
+        Text("📅 $selectedDate", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
         // 일정 목록
         LazyColumn(
@@ -232,22 +228,28 @@ fun AddScheduleDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("새 일정 추가") },
+        title = { Text("새로운 일정 추가") },
         text = {
             Column {
-                Button(onClick = {
-                    val calendar = Calendar.getInstance()
-                    TimePickerDialog(
-                        context,
-                        { _, hour, minute ->
-                            time = String.format("%02d%02d", hour, minute)
-                        },
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        true
-                    ).show()
-                }) {
-                    Text("시간 선택: ${if (time.isEmpty()) "선택 안 됨" else formatTime(time)}")
+                Button(
+                    onClick = {
+                        val calendar = Calendar.getInstance()
+                        TimePickerDialog(
+                            context,
+                            { _, hour, minute ->
+                                time = String.format("%02d%02d", hour, minute)
+                            },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            true
+                        ).show()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF)) // 버튼 색상 변경
+                ) {
+                    Text(
+                        "시간 선택: ${if (time.isEmpty()) "선택 안 됨" else formatTime(time)}",
+                        color = Color.White
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
@@ -264,7 +266,7 @@ fun AddScheduleDialog(
                         onAddSchedule(Schedule(selectedDate, time, event))
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
             ) {
                 Text("추가", color = Color.White)
             }
@@ -272,7 +274,7 @@ fun AddScheduleDialog(
         dismissButton = {
             Button(
                 onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
             ) {
                 Text("취소", color = Color.White)
             }
