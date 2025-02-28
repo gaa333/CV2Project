@@ -41,11 +41,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -80,16 +84,24 @@ fun MyApp() {
     val announcementDb = remember { AnnouncementDatabase() }
     val studentDb = remember { StudentDatabase() }
     val authManager = remember { AuthManager() }
-
+    var userName by remember { mutableStateOf("알수없음") }
+    var userEmail by remember { mutableStateOf("알수없음") }
     var userRole by remember { mutableStateOf("게스트") }
     val auth = FirebaseAuth.getInstance()
 
     // 인증 상태 변경 리스너 등록
     DisposableEffect(auth) {
         val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            // 인증 상태가 변경되면 getCurrentUserRole 호출
-            authManager.getCurrentUserRole { role ->
-                userRole = role ?: "게스트"
+            authManager.getCurrentUserInfo { user ->
+                if (user != null) {
+                    userName = user.name
+                    userEmail = user.email
+                    userRole = user.role
+                } else {
+                    userName = "Unknown"
+                    userEmail = "unknown@example.com"
+                    userRole = "게스트"
+                }
             }
         }
         auth.addAuthStateListener(authStateListener)
@@ -97,6 +109,7 @@ fun MyApp() {
             auth.removeAuthStateListener(authStateListener)
         }
     }
+
     AnimatedNavHost(
         navController = navController,
         startDestination = "splash",
@@ -108,7 +121,7 @@ fun MyApp() {
         composable("splash") { SplashScreen(navController, authManager) }
         composable("login") { LoginScreen(navController, authManager) }
         composable("signup") { SignUpScreen(navController, authManager) }
-        composable("main") { MainScreen(navController, authManager, userRole) }
+        composable("main") { MainScreen(navController, authManager, userRole, userName, userEmail) }
         composable("poseAnalysis") { PoseAnalysisScreen(navController, userRole) }
         composable("notice") { NoticeScreen(navController, noticeDb, userRole) }
         composable("announcement") { AnnouncementScreen(navController, announcementDb, userRole) }
@@ -116,7 +129,13 @@ fun MyApp() {
         composable("pickupService") { PickupServiceScreen(navController) }
         composable("payment") { PaymentScreen(navController) }
         composable("studentClassList") { StudentClassListScreen(navController, userRole) }
-        composable("performanceReport") { PerformanceReportScreen(navController, studentDb, userRole) }
+        composable("performanceReport") {
+            PerformanceReportScreen(
+                navController,
+                studentDb,
+                userRole
+            )
+        }
         composable("addNotice") { AddNoticeScreen(navController, studentDb, noticeDb, userRole) }
 
         // Detail Notice Screen
@@ -141,7 +160,13 @@ fun MyApp() {
         }
 
         // Add Announcement Screen
-        composable("addAnnouncement") { AddAnnouncementScreen(navController, announcementDb, userRole) }
+        composable("addAnnouncement") {
+            AddAnnouncementScreen(
+                navController,
+                announcementDb,
+                userRole
+            )
+        }
 
         // Detail Announcement Screen
         composable(
@@ -240,7 +265,15 @@ fun MyApp() {
 }
 
 @Composable
-fun MainScreen(navController: NavHostController, authManager: AuthManager, userRole: String) {
+fun MainScreen(
+    navController: NavHostController,
+    authManager: AuthManager,
+    userRole: String,
+    userName: String,
+    userEmail: String
+) {
+    var showUserDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .padding(WindowInsets.statusBars.only(WindowInsetsSides.Top).asPaddingValues())
@@ -266,6 +299,15 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager, userR
                         }
                     }
             )
+            Image(
+                painter = painterResource(R.drawable.user),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .offset(x = 300.dp, y = 20.dp)
+                    .clickable { showUserDialog = true }
+            )
+
         }
         Spacer(modifier = Modifier.height(20.dp))
         Column(
@@ -322,6 +364,29 @@ fun MainScreen(navController: NavHostController, authManager: AuthManager, userR
             }
             Spacer(modifier = Modifier.weight(0.1f))
         }
+    }
+    if (showUserDialog) {
+        AlertDialog(
+            onDismissRequest = { showUserDialog = false },
+            title = { Text("사용자 정보", fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text("Name: $userName", fontSize = 17.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text("Email: $userEmail", fontSize = 17.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text("Role: $userRole", fontSize = 17.sp)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showUserDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4786FF))
+                ) {
+                    Text("확인", color = Color.White)
+                }
+            }
+        )
     }
 }
 
