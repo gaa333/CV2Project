@@ -300,8 +300,9 @@ fun MainScreen(
                 painter = painterResource(R.drawable.logout),
                 contentDescription = null,
                 modifier = Modifier
+                    .padding(start = 15.dp)
                     .size(40.dp)
-                    .offset(x = 18.dp, y = 20.dp)
+                    .align(Alignment.CenterStart)
                     .clickable {
                         authManager.logout()
                         navController.navigate("login") {
@@ -313,11 +314,11 @@ fun MainScreen(
                 painter = painterResource(R.drawable.user),
                 contentDescription = null,
                 modifier = Modifier
+                    .padding(end = 15.dp)
                     .size(40.dp)
-                    .offset(x = 300.dp, y = 20.dp)
+                    .align(Alignment.CenterEnd)
                     .clickable { showUserDialog = true }
             )
-
         }
         Spacer(modifier = Modifier.height(20.dp))
         Column(
