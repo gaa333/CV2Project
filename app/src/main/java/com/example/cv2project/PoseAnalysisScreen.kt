@@ -49,6 +49,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -265,25 +266,26 @@ fun PoseAnalysisContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .systemBarsPadding()
                 .background(Color.Black),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 15.dp, top = 15.dp),
+                    .padding(start = 15.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "뒤로가기",
                     modifier = Modifier
-                        .size(25.dp)
+                        .size(40.dp)
                         .clickable { navController.popBackStack() },
                     tint = Color.White
                 )
             }
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.size(30.dp))
             Text(
                 "실시간 동작 분석",
                 fontSize = 25.sp,
@@ -855,20 +857,21 @@ fun PoseReportScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
             .background(Color.Black),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 15.dp, top = 15.dp),
+                .padding(start = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "뒤로가기",
                 modifier = Modifier
-                    .size(25.dp)
+                    .size(40.dp)
                     .clickable { navController.popBackStack() },
                 tint = Color.White
             )

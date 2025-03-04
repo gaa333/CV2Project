@@ -54,6 +54,8 @@ import com.example.cv2project.firebase.StudentDatabase
 import com.example.cv2project.models.Comment
 import com.example.cv2project.models.Notice
 import com.example.cv2project.models.Student
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -138,10 +140,29 @@ fun NoticeScreen(navController: NavController, noticeDb: NoticeDatabase, userRol
                             .padding(vertical = 4.dp)
                             .clickable {
                                 navController.navigate(
-                                    "detailNotice?id=${notice.id}&title=${notice.title}" +
-                                            "&content=${notice.content}" +
-                                            "&studentName=${notice.studentName}" +
-                                            "&date=${notice.date}"
+                                    run {
+                                        val encodedTitle = URLEncoder.encode(
+                                            notice.title,
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                        val encodedContent = URLEncoder.encode(
+                                            notice.content,
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                        val encodedStudentName = URLEncoder.encode(
+                                            notice.studentName,
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                        val encodedDate = URLEncoder.encode(
+                                            notice.date,
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                        "detailNotice?id=${notice.id}" +
+                                                "&title=${encodedTitle}" +
+                                                "&content=${encodedContent}" +
+                                                "&studentName=${encodedStudentName}" +
+                                                "&date=${encodedDate}"
+                                    }
                                 )
                             },
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFE0E0E0))
@@ -447,7 +468,7 @@ fun DetailNoticeScreen(
                 .padding(20.dp)
         ) {
             Spacer(modifier = Modifier.size(10.dp))
-            Text(text = notice.title, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Text(text = notice.title, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 30.sp)
             Spacer(modifier = Modifier.size(20.dp))
             Text(text = notice.content, fontSize = 18.sp)
             Spacer(modifier = Modifier.size(50.dp))

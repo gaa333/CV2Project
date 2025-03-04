@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.cv2project.firebase.AnnouncementDatabase
 import com.example.cv2project.models.Announcement
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -121,12 +123,16 @@ fun AnnouncementScreen(
                             .padding(vertical = 4.dp)
                             .clickable {
                                 navController.navigate(
-                                    "detailAnnouncement?id=${announcement.id}" +
-                                            "&title=${announcement.title}" +
-                                            "&content=${announcement.content}" +
-                                            "&date=${announcement.date}"
-                                )
-                            },
+                                    run {
+                                        val encodedTitle = URLEncoder.encode(announcement.title, StandardCharsets.UTF_8.toString())
+                                        val encodedContent = URLEncoder.encode(announcement.content, StandardCharsets.UTF_8.toString())
+                                        val encodedDate = URLEncoder.encode(announcement.date, StandardCharsets.UTF_8.toString())
+                                        "detailAnnouncement?id=${announcement.id}" +
+                                                "&title=${encodedTitle}" +
+                                                "&content=${encodedContent}" +
+                                                "&date=${encodedDate}"
+                                    }
+                                )                            },
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFE0E0E0))
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -336,7 +342,7 @@ fun DetailAnnouncementScreen(
                 .padding(20.dp)
         ) {
             Spacer(modifier = Modifier.size(10.dp))
-            Text(text = announcement.title, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Text(text = announcement.title, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 30.sp)
             Spacer(modifier = Modifier.size(20.dp))
             Text(text = announcement.content, fontSize = 18.sp)
             Spacer(modifier = Modifier.size(50.dp))

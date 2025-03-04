@@ -64,6 +64,8 @@ import com.example.cv2project.models.Announcement
 import com.example.cv2project.models.Notice
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.firebase.auth.FirebaseAuth
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -150,10 +152,14 @@ fun MyApp() {
             )
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
-            val title = backStackEntry.arguments?.getString("title") ?: "제목 없음"
-            val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
-            val studentName = backStackEntry.arguments?.getString("studentName") ?: "이름 없음"
-            val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
+            val title = backStackEntry.arguments?.getString("title")
+                ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) } ?: "제목 없음"
+            val content = backStackEntry.arguments?.getString("content")
+                ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) } ?: "내용 없음"
+            val studentName = backStackEntry.arguments?.getString("studentName")
+                ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) } ?: "이름 없음"
+            val date = backStackEntry.arguments?.getString("date")
+                ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) } ?: "날짜 없음"
 
             val notice = Notice(id, title, content, studentName, date)
             DetailNoticeScreen(navController, notice, noticeDb, authManager, userRole)
@@ -178,11 +184,15 @@ fun MyApp() {
                 navArgument("date") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            // 네비게이션 인자로 전달된 데이터를 추출
+            // 네비게이션 인자로 전달된 데이터를 추출 후 URL 디코딩 처리
             val id = backStackEntry.arguments?.getString("id") ?: ""
-            val title = backStackEntry.arguments?.getString("title") ?: "제목 없음"
-            val content = backStackEntry.arguments?.getString("content") ?: "내용 없음"
-            val date = backStackEntry.arguments?.getString("date") ?: "날짜 없음"
+            val title = backStackEntry.arguments?.getString("title")
+                ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) } ?: "제목 없음"
+            val content = backStackEntry.arguments?.getString("content")
+                ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) } ?: "내용 없음"
+            val date = backStackEntry.arguments?.getString("date")
+                ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) } ?: "날짜 없음"
+
             val announcement = Announcement(id, title, content, date)
             DetailAnnouncementScreen(navController, announcement, announcementDb, userRole)
         }
