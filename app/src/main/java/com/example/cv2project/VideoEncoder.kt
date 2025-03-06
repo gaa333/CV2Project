@@ -21,15 +21,13 @@ class VideoEncoder(
     private var isMuxerStarted = false
     private var isRecording = false
     private var presentationTimeUs: Long = 0
-    private var inputBuffer: ByteBuffer? = null
 
     fun start() {
         try {
             val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height)
             format.setInteger(MediaFormat.KEY_BIT_RATE, 5_000_000) // 비트 레이트 감소
             format.setInteger(MediaFormat.KEY_FRAME_RATE, frameRate)
-            // 모든 프레임을 I-프레임으로 만들기 위해 KEY_I_FRAME_INTERVAL 값을 0으로 설정
-            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0)
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
             // Surface 입력 모드 사용
             format.setInteger(
                 MediaFormat.KEY_COLOR_FORMAT,
@@ -38,7 +36,8 @@ class VideoEncoder(
 
             mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
             mediaCodec?.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-            inputSurface = mediaCodec?.createInputSurface() // Surface 얻기
+            // Surface 얻기
+            inputSurface = mediaCodec?.createInputSurface()
             mediaCodec?.start()
 
             mediaMuxer = MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)

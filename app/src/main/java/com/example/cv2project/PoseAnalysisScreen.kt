@@ -1,5 +1,7 @@
 package com.example.cv2project
 
+import VideoEncoder
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
@@ -18,6 +20,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -49,6 +52,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,6 +61,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -79,6 +84,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
@@ -100,7 +109,7 @@ import java.util.concurrent.TimeUnit
 
 // Pose Analysis
 @Composable
-fun PoseAnalysisScreen(navController: androidx.navigation.NavController) {
+fun PoseAnalysisScreen(navController: NavController, userRole: String) {
     val context = LocalContext.current
     // Compose ViewModel 사용 (기존 by viewModels() 대신)
     val viewModel: PoseAnalysisViewModel = viewModel()
@@ -142,15 +151,85 @@ fun PoseAnalysisContent(
     selectedVideoUri: Uri?,
     viewModel: PoseAnalysisViewModel
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var isAnalyzing by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+    // 동영상 파일을 저장할 상태 변수
+    var videoFile by remember { mutableStateOf<File?>(null) }
 
+    // 분석된 프레임이 모두 준비되면 동영상으로 인코딩
     LaunchedEffect(frames) {
         if (frames.isNotEmpty()) {
             isLoading = false
+            // 인코딩은 시간이 걸릴 수 있으므로 코루틴으로 처리
+            videoFile = withContext(Dispatchers.IO) {
+                encodeFramesToVideo(context, frames)
+            }
         }
     }
+
+    // 만약 카메라 모드가 아니라면 (갤러리 모드)
+    if (videoFile == null) {
+        // 로딩 상태 또는 안내 메시지 표시
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(color = Color.White)
+                Spacer(modifier = Modifier.height(10.dp))
+                Text("동영상 인코딩 중...", color = Color.White)
+            } else {
+                Text("분석된 프레임을 동영상으로 생성합니다.", color = Color.White)
+            }
+        }
+    } else {
+        // 동영상 파일이 준비되면 VideoPlayer를 사용해 재생
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 상단 바: 뒤로 가기 버튼 등 (필요시 추가)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "뒤로가기",
+                    modifier = Modifier
+                        .size(25.dp)
+                        .clickable { navController.popBackStack() },
+                    tint = Color.White
+                )
+            }
+            // 동영상 파일에서 FPS 값을 읽어옵니다.
+            val videoFps = getVideoFrameRate(videoFile!!)
+            // 동영상 플레이어 재생
+            VideoPlayerWithFrameStepControls(videoFile = videoFile!!)
+            Spacer(modifier = Modifier.height(20.dp))
+            // 결과 저장 등 추가 기능 버튼
+            Button(
+                onClick = {
+                    // 동영상 파일을 갤러리에 저장하는 로직 추가 가능
+                    Toast.makeText(context, "동영상이 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Text("동영상 저장", color = Color.White)
+            }
+        }
+    }
+
 
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(120, TimeUnit.SECONDS)
@@ -166,7 +245,6 @@ fun PoseAnalysisContent(
 
     val service = retrofit.create(FlaskService::class.java)
 
-    val context = LocalContext.current // ✅ 현재 Composable의 Context 가져오기
     var currentFrameIndex by remember { mutableStateOf(0) }
 
     // 카메라 화면 표시 여부
@@ -187,7 +265,7 @@ fun PoseAnalysisContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(androidx.compose.ui.graphics.Color.Black),
+                .background(Color.Black),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -202,20 +280,20 @@ fun PoseAnalysisContent(
                     modifier = Modifier
                         .size(25.dp)
                         .clickable { navController.popBackStack() },
-                    tint = androidx.compose.ui.graphics.Color.White
+                    tint = Color.White
                 )
             }
             Spacer(modifier = Modifier.height(30.dp))
             Text(
                 "실시간 동작 분석",
                 fontSize = 25.sp,
-                color = androidx.compose.ui.graphics.Color.White
+                color = Color.White
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 "학생 영상을 넣어보세요",
                 fontSize = 18.sp,
-                color = androidx.compose.ui.graphics.Color.Green
+                color = Color.Green
             )
             Spacer(modifier = Modifier.height(80.dp))
 
@@ -225,34 +303,42 @@ fun PoseAnalysisContent(
                     .height(240.dp)
                     .width(350.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(androidx.compose.ui.graphics.Color.Gray),
+                    .background(Color.Gray),
                 contentAlignment = Alignment.TopCenter
             ) {
-                if (isAnalyzing) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = androidx.compose.ui.graphics.Color.White,
-                        )
-                        Spacer(modifier = Modifier.size(15.dp))
-                        Text(
-                            "AI 분석 중...",
-                            fontSize = 20.sp,
-                            modifier = Modifier.padding(start = 5.dp)
+                when {
+                    videoFile != null -> {
+                        // 인코딩된 동영상 파일이 준비되었을 때
+                        VideoPlayerWithFrameStepControls(
+                            videoFile = videoFile!!
                         )
                     }
-                } else if (isLoading) {
-                    CircularProgressIndicator(
-                        color = androidx.compose.ui.graphics.Color.White,
-                        modifier = Modifier.padding(top = 100.dp)
-                    )
-                } else {
-                    if (frames.isNotEmpty()) {
-                        PoseAnimation(frames)
-                    } else {
+
+                    isAnalyzing -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(color = Color.White)
+                            Spacer(modifier = Modifier.size(15.dp))
+                            Text(
+                                "AI 분석 중...",
+                                fontSize = 20.sp,
+                                modifier = Modifier.padding(start = 5.dp)
+                            )
+                        }
+                    }
+
+                    isLoading -> {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.padding(top = 100.dp)
+                        )
+                    }
+
+                    else -> {
+                        // 아무것도 없을 때 : 기본 안내 텍스트만 표시
                         Text(
                             "동작 분석 영상",
                             fontSize = 20.sp,
@@ -276,8 +362,7 @@ fun PoseAnalysisContent(
                         .width(60.dp)
                         .height(60.dp)
                         .background(
-                            androidx.compose.ui.graphics.Color.DarkGray,
-                            shape = RoundedCornerShape(16.dp)
+                            Color.DarkGray, shape = RoundedCornerShape(16.dp)
                         )
                 ) {
                     Image(
@@ -289,6 +374,8 @@ fun PoseAnalysisContent(
                 Spacer(modifier = Modifier.width(60.dp))
                 IconButton(
                     onClick = {
+                        // 새 동영상 업로드 시 기존 동영상 제거
+                        videoFile = null
                         onSelectVideo()
                         isLoading = true
                     },
@@ -296,8 +383,7 @@ fun PoseAnalysisContent(
                         .width(60.dp)
                         .height(60.dp)
                         .background(
-                            androidx.compose.ui.graphics.Color.DarkGray,
-                            shape = RoundedCornerShape(16.dp)
+                            Color.DarkGray, shape = RoundedCornerShape(16.dp)
                         )
                 ) {
                     Image(
@@ -361,8 +447,8 @@ fun PoseAnalysisContent(
                     .height(60.dp)
                     .padding(horizontal = 16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = androidx.compose.ui.graphics.Color.DarkGray,
-                    contentColor = androidx.compose.ui.graphics.Color.White
+                    containerColor = Color.DarkGray,
+                    contentColor = Color.White
                 )
             ) {
                 Text(
@@ -749,10 +835,16 @@ fun PoseReportScreen(
     ankleAngle: Double,
     hipScore: Double,
     kneeScore: Double,
-    ankleScore: Double
+    ankleScore: Double,
+    userRole: String
 ) {
     val context = LocalContext.current
-    var videoUri by remember { mutableStateOf<Uri?>(null) }
+//    val videoUri: Uri = FileProvider.getUriForFile(
+//        context,
+//        "${BuildConfig.APPLICATION_ID}.fileprovider",
+//        outputFile
+//    )
+
 
     Column(
         modifier = Modifier
@@ -912,6 +1004,140 @@ fun saveImageToGallery(context: Context, bitmap: Bitmap, filename: String = "Pos
         val outputStream: OutputStream? = contentResolver.openOutputStream(uri)
         outputStream?.use {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+        }
+    }
+}
+
+// 동영상 인코딩 함수 : 분석된 프레임(비트맵 리스트)을 받아 VideoEncoder를 사용해 동영상 파일로 저장하는 함수
+fun encodeFramesToVideo(context: Context, frames: List<Bitmap>): File? {
+    if (frames.isEmpty()) {
+        Log.e("VideoEncoder", "❌ No frames to encode!")
+        return null
+    }
+
+    Log.d("VideoEncoder", "🟢 Received ${frames.size} frames for encoding")
+
+    // ✅ 1. 저장할 파일 경로 지정 (내부 저장소 사용)
+    val outputDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+    val outputFile = File(outputDir, "encoded_video.mp4")
+
+    // ✅ 2. VideoEncoder 초기화
+    // 첫 프레임의 크기를 기준으로 동영상 크기를 결정합니다.
+    val width = frames.first().width
+    val height = frames.first().height
+    val frameRate = 10 // 원하는 프레임 레이트 (예: 초당 10프레임)
+    val encoder = VideoEncoder(outputFile, width, height, frameRate)
+
+    encoder.start()
+
+    // ✅ 3. 프레임을 순차적으로 인코딩
+    frames.forEachIndexed { index, frame ->
+        Log.d("VideoEncoder", "Encoding frame $index / ${frames.size}")
+        encoder.encodeFrame(frame)
+    }
+
+    encoder.finish()
+
+    // ✅ 4. 동영상 파일 크기 확인 (0바이트인지 로그 출력)
+    checkVideoFileSize(outputFile)
+
+    return if (outputFile.length() > 0) outputFile else {
+        Log.e("VideoEncoder", "Encoded video file is empty!")
+        null
+    }
+}
+
+//동영상 재생용
+@OptIn(UnstableApi::class)
+@SuppressLint("RememberReturnType")
+@Composable
+fun VideoPlayerWithFrameStepControls(
+    videoFile: File,
+    modifier: Modifier = Modifier,
+    fps: Int = 30
+) {
+    val context = LocalContext.current
+    // ExoPlayer 인스턴스 생성 및 기억: 초기화(remember를 사용하여 상태 유지)
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(Uri.fromFile(videoFile)))
+            playWhenReady = true // 자동 재생하려면 true로 설정
+            prepare()
+        }
+    }
+    DisposableEffect(videoFile) {
+        onDispose { exoPlayer.release() }
+    }
+    // VideoView를 사용하여 동영상을 재생
+    AndroidView(
+        factory = { ctx ->
+            PlayerView(ctx).apply {
+                player = exoPlayer
+                useController = true             // 컨트롤러 사용
+                setControllerAutoShow(true)        // 자동으로 컨트롤러 표시
+                setControllerShowTimeoutMs(3000)   // 3초 후 자동 숨김
+                showController()                   // 초기 상태에서 컨트롤러 즉시 표시
+                // 영상이 Box 크기에 맞춰지고, 종횡비 유지 (레터박스 가능)
+                resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                // 이전/다음 트랙 버튼 숨기기
+                setShowPreviousButton(false)
+                setShowNextButton(false)
+            }
+        },
+        modifier = modifier
+    )
+
+    // 동영상과 버튼 사이의 여백
+    Spacer(modifier = Modifier.height(10.dp))
+
+    // 프레임 이동 버튼
+    FrameStepControls(exoPlayer = exoPlayer, fps = fps)
+}
+
+fun checkVideoFileSize(videoFile: File) {
+    Log.d("VideoCheck", "File path: ${videoFile.absolutePath}")  // 파일 위치 확인
+    Log.d("VideoCheck", "File size: ${videoFile.length()} bytes") // 파일 크기 확인
+}
+
+fun getVideoFrameRate(videoFile: File): Float {
+    val retriever = MediaMetadataRetriever()
+    return try {
+        retriever.setDataSource(videoFile.absolutePath)
+        // METADATA_KEY_CAPTURE_FRAMERATE 는 모든 동영상에서 제공되지 않을 수 있음
+        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)
+            ?.toFloat()
+            ?: 10f // 없으면 기본값(예: 10fps) 반환
+    } catch (e: Exception) {
+        e.printStackTrace()
+        10f
+    } finally {
+        retriever.release()
+    }
+}
+
+@Composable
+fun FrameStepControls(exoPlayer: ExoPlayer, fps: Int) {
+    // 한 프레임의 시간 (밀리초)
+    val frameDurationMs = 1000L / fps
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Button(onClick = {
+            // 항상 일시 정지 상태로 전환
+            exoPlayer.playWhenReady = false
+            val newPos = exoPlayer.currentPosition - frameDurationMs
+            exoPlayer.seekTo(newPos.coerceAtLeast(0L))
+        }) {
+            Text("이전 프레임")
+        }
+        Button(onClick = {
+            // 항상 일시 정지 상태로 전환
+            exoPlayer.playWhenReady = false
+            val newPos = exoPlayer.currentPosition + frameDurationMs
+            exoPlayer.seekTo(newPos.coerceAtMost(exoPlayer.duration))
+        }) {
+            Text("다음 프레임")
         }
     }
 }
